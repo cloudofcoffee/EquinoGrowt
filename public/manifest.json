@@ -1,0 +1,21 @@
+{
+  "name": "EquinoGrowt",
+  "short_name": "EquinoGrowt",
+  "description": "Algo a",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#146b60",
+  "theme_color": "#146b60",
+  "icons": [
+    {
+      "src": "../img/EquinoGrowt-192px.svg",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "../img/EquinoGrowt-512px.svg",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
