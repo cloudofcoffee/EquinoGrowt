@@ -80,7 +80,7 @@
     </div>
 
     <!-- Vista Paciente -->
-    <div v-else class="">
+    <div v-else-if="tipo === 'paciente'">
       <Loader v-if="accionando"
         class="absolute inset-0 z-20 bg-white/80 flex items-center justify-center rounded-2xl" />
 
@@ -89,7 +89,7 @@
           <Loader class="absolute inset-0 z-20 bg-white/80 flex items-center justify-center rounded-2xl" />
         </div>
 
-        <div v-else-if="tipo === 'paciente'">
+        <div>
           <!-- Header -->
           <div class="flex justify-between items-center mb-6">
             <div>
@@ -204,6 +204,14 @@
             </div>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- Vista Admin -->
+    <div v-else>
+      <div class="w-full h-full flex justify-center items-center bg-white">
+        <img src="/img/estamos-trabajando.png" alt="Estamos trabajando en ello"
+          class="w-full rounded-lg max-w-xl object-cover shadow" />
       </div>
     </div>
   </div>
