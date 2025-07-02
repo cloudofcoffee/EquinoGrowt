@@ -9,8 +9,7 @@
             <img src="/img/EquinoGrowt.svg" alt="Logo"
                 class="bg-white w-36 h-36 mb-6 rounded-full border-4 border-white shadow-md transition-transform duration-300 hover:scale-105" />
             <h2 class="text-3xl font-extrabold text-center leading-tight">
-                Crea tu cuenta <br />
-                en EquinoGrowt
+                ¿Sos nuevo?<br> ¡Crea tu cuenta!
             </h2>
             <p class="mt-4 text-center">
                 ¿Ya tenés una cuenta?<br class="md:hidden">
@@ -21,7 +20,7 @@
 
         <!-- Columna Derecha: Formulario -->
         <div :class="{ 'opacity-30 pointer-events-none': cargando }"
-            class="md:w-1/2 w-full p-10 transition-opacity duration-300">
+            class="md:w-1/2 w-full p-10 transition-opacity duration-300 brand-pattern">
             <h3 class="text-2xl font-semibold text-[#146b60] mb-6 text-center md:text-left">
                 Registrarme
             </h3>
@@ -79,11 +78,16 @@ export default {
             name: "",
             email: "",
             password: "",
+            condicionMedica: "",
+            edad: null,
+            tituloTempURL: null,
+            acompanante: "Administrada por padres",
             mostrarPassword: false,
             errorMessage: "",
             cargando: false,
         };
     },
+
     methods: {
         toggleMostrarPassword() {
             this.mostrarPassword = !this.mostrarPassword;
@@ -94,6 +98,26 @@ export default {
             this.cargando = true;
 
             try {
+                // ✅ Primero pedimos el tipo de usuario y datos adicionales
+                const tipo = await this.seleccionarTipoUsuario();
+                if (!tipo) {
+                    this.errorMessage = "Debes seleccionar un tipo de usuario.";
+                    return;
+                }
+
+                let tituloURL = null;
+
+                if (tipo === "doctor") {
+                    const tempURL = await this.subirTituloDoctor("temp");
+                    if (!tempURL) {
+                        this.errorMessage = "Debes subir un título para registrarte como doctor.";
+                        this.cargando = false;
+                        return;
+                    }
+                    this.tituloTempURL = tempURL;
+                }
+
+                // ✅ Solo si el usuario completó todos los pasos, lo registramos
                 const userCredential = await createUserWithEmailAndPassword(auth, this.email, this.password);
                 const user = userCredential.user;
 
@@ -103,13 +127,6 @@ export default {
                     photoURL: photoURL,
                 });
 
-                const tipo = await this.seleccionarTipoUsuario();
-                if (!tipo) {
-                    this.errorMessage = "Debes seleccionar un tipo de usuario.";
-                    return;
-                }
-
-                let tituloURL = null;
                 let datosUsuario = {
                     uid: user.uid,
                     nombre: this.name,
@@ -119,11 +136,10 @@ export default {
                 };
 
                 if (tipo === "doctor") {
-                    tituloURL = await this.subirTituloDoctor(user.uid);
-                    if (!tituloURL) {
-                        this.errorMessage = "Debes subir un título para registrarte como doctor.";
-                        return;
+                    if (this.tituloTempURL) {
+                        tituloURL = this.tituloTempURL;
                     }
+
                     datosUsuario.tipo = "pendiente";
                     datosUsuario.solicitudDoctor = true;
                     datosUsuario.tituloDoctorURL = tituloURL;
@@ -131,6 +147,12 @@ export default {
                     datosUsuario.tipo = tipo;
                     datosUsuario.solicitudDoctor = false;
                     datosUsuario.tituloDoctorURL = null;
+
+                    if (tipo === "paciente") {
+                        datosUsuario.condicionMedica = this.condicionMedica;
+                        datosUsuario.edad = this.edad;
+                        datosUsuario.acompanante = this.acompanante;
+                    }
                 }
 
                 const db = getFirestore();
@@ -166,21 +188,17 @@ export default {
                 Swal.fire({
                     title: 'Seleccioná tu rol',
                     html: `
-                <div style="display: flex; justify-content: center; gap: 2rem; margin-top: 1.5rem;">
-                    <div class="swal-role" data-role="paciente" style="cursor: pointer; text-align: center;">
-                        <i class="fas fa-user-injured fa-3x"></i>
-                        <p style="margin-top: 0.5rem;">Paciente</p>
-                    </div>
-                    <div class="swal-role" data-role="familiar" style="cursor: pointer; text-align: center;">
-                        <i class="fas fa-users fa-3x"></i>
-                        <p style="margin-top: 0.5rem;">Familiar</p>
-                    </div>
-                    <div class="swal-role" data-role="doctor" style="cursor: pointer; text-align: center;">
-                        <i class="fas fa-user-md fa-3x"></i>
-                        <p style="margin-top: 0.5rem;">Doctor</p>
-                    </div>
-                </div>
-            `,
+                        <div style="display: flex; justify-content: center; gap: 2rem; margin-top: 1.5rem;">
+                            <div class="swal-role" data-role="paciente" style="cursor: pointer; text-align: center;">
+                                <i class="fas fa-user-injured fa-3x"></i>
+                                <p style="margin-top: 0.5rem;">Paciente</p>
+                            </div>
+                            <div class="swal-role" data-role="doctor" style="cursor: pointer; text-align: center;">
+                                <i class="fas fa-user-md fa-3x"></i>
+                                <p style="margin-top: 0.5rem;">Doctor</p>
+                            </div>
+                        </div>
+                    `,
                     showConfirmButton: false,
                     allowOutsideClick: false,
                     allowEscapeKey: false,
@@ -192,6 +210,7 @@ export default {
                         roles.forEach((el) => {
                             el.addEventListener("click", async () => {
                                 const tipo = el.getAttribute("data-role");
+
                                 if (tipo === "doctor") {
                                     const confirm = await Swal.fire({
                                         title: "Solicitud como Doctor",
@@ -207,6 +226,98 @@ export default {
                                         return;
                                     }
                                 }
+
+                                else {
+                                    const { value: formValues } = await Swal.fire({
+                                        title: "Información del paciente",
+                                        html: `
+                                        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                                            <div style="position: relative;">
+                                                <input id="swal-input-edad" type="number" min="0" max="120" placeholder=" " style="width: 100%; padding: 12px; font-size: 15px; border: 1px solid #ccc; border-radius: 8px; background: white; outline: none;" class="focus:outline-none focus:ring-2 focus:ring-[#146b60]" />
+                                                <label for="swal-input-edad" style="position: absolute; left: 12px; top: 12px; color: #888; font-size: 15px; background: white; padding: 0 4px; transition: 0.2s; pointer-events: none;">Edad</label>
+                                            </div>
+                                            <div style="position: relative;">
+                                                <textarea id="swal-input-condicion" rows="3" placeholder=" " style="width: 100%; padding: 12px; font-size: 15px; border: 1px solid #ccc; border-radius: 8px; background: white; outline: none; resize: vertical;" class="focus:outline-none focus:ring-2 focus:ring-[#146b60]"></textarea>
+                                                <label for="swal-input-condicion" style="position: absolute; left: 12px; top: 12px; color: #888; font-size: 15px; background: white; padding: 0 4px; transition: 0.2s; pointer-events: none;">Condición médica</label>
+                                            </div>
+                                            <div style="position: relative;">
+                                                <select id="swal-input-acompanante" class="focus:outline-none focus:ring-2 focus:ring-[#146b60]" style="width: 100%; padding: 12px; font-size: 15px; border: 1px solid #ccc; border-radius: 8px; background: white; outline: none;">
+                                                    <option disabled selected value="">Seleccione una opción</option>
+                                                    <option value="Administrada por padres">Administrada por padres</option>
+                                                    <option value="Propia">Propia</option>
+                                                </select>
+                                                <label for="swal-input-acompanante" style="position: absolute; left: 12px; top: 12px; color: #888; font-size: 15px; background: white; padding: 0 4px; transition: 0.2s; pointer-events: none;">Cuenta administrada por</label>
+                                            </div>
+                                        </div>
+                                        `,
+                                        background: "#f8f9fa",
+                                        focusConfirm: false,
+                                        showCancelButton: true,
+                                        confirmButtonText: "Guardar",
+                                        cancelButtonText: "Cancelar",
+                                        customClass: {
+                                            popup: 'rounded-xl',
+                                            confirmButton: 'bg-[#146b60] text-white px-4 py-2 rounded-lg',
+                                            cancelButton: 'text-gray-50 bg-red-600 px-4 py-2 rounded-lg'
+                                        },
+                                        didOpen: () => {
+                                            const fields = ['swal-input-edad', 'swal-input-condicion', 'swal-input-acompanante'];
+                                            fields.forEach(id => {
+                                                const input = document.getElementById(id);
+                                                const label = document.querySelector(`label[for="${id}"]`);
+                                                const handleFloating = () => {
+                                                    if (input.value) {
+                                                        label.style.top = "-8px";
+                                                        label.style.fontSize = "13px";
+                                                        label.style.fontWeight = "600";
+                                                        label.style.color = "#146b60";
+                                                    } else {
+                                                        label.style.top = "12px";
+                                                        label.style.fontSize = "15px";
+                                                        label.style.fontWeight = "normal";
+                                                        label.style.color = "#888";
+                                                    }
+                                                };
+                                                input.addEventListener("input", handleFloating);
+                                                input.addEventListener("focus", handleFloating);
+                                                input.addEventListener("blur", handleFloating);
+                                                handleFloating();
+                                            });
+                                        },
+                                        preConfirm: () => {
+                                            const edad = document.getElementById("swal-input-edad").value;
+                                            const condicion = document.getElementById("swal-input-condicion").value.trim();
+                                            const acompanante = document.getElementById("swal-input-acompanante").value;
+
+                                            if (!edad || isNaN(edad) || edad < 0 || edad > 120) {
+                                                Swal.showValidationMessage("Ingresá una edad válida entre 0 y 120.");
+                                                return;
+                                            }
+
+                                            if (!condicion) {
+                                                Swal.showValidationMessage("Debés ingresar una condición médica.");
+                                                return;
+                                            }
+
+                                            if (!acompanante) {
+                                                Swal.showValidationMessage("Seleccioná quién administra la cuenta.");
+                                                return;
+                                            }
+
+                                            return { edad, condicion, acompanante };
+                                        }
+                                    });
+
+                                    if (!formValues) {
+                                        resolve(null);
+                                        Swal.close();
+                                        return;
+                                    }
+
+                                    this.condicionMedica = formValues.condicion;
+                                    this.edad = parseInt(formValues.edad);
+                                    this.acompanante = formValues.acompanante;
+                                }
                                 resolve(tipo);
                                 Swal.close();
                             });
@@ -221,19 +332,22 @@ export default {
                 Swal.fire({
                     title: "Subí tu título profesional",
                     html: `
-                    <div class="swal-upload-container">
-                        <label for="uploadTitulo" class="upload-button">
-                            <i class="fas fa-upload"></i> Elegir archivo
-                        </label>
-                        <input type="file" id="uploadTitulo" accept="image/*,application/pdf" class="hidden-input">
-                        <p id="fileName" class="upload-filename"></p>
-                    </div>
+                        <div class="swal-upload-container" style="display: flex; flex-direction: column; align-items: center; gap: 1rem; margin-top: 1rem;">
+                            <label for="uploadTitulo" id="uploadLabel" style="background-color: #146b60; color: white; padding: 0.75rem 1.5rem; border-radius: 9999px; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 600; transition: background-color 0.3s ease;" onmouseover="this.style.backgroundColor='#0e574e';" onmouseout="this.style.backgroundColor='#146b60';">
+                                <i class="fas fa-upload"></i>
+                                <span id="labelText">Elegir archivo</span>
+                            </label>
+                            <input type="file" id="uploadTitulo" accept="image/*,application/pdf" style="display: none;" />
+                        </div>
                     `,
-
                     showCancelButton: true,
-                    confirmButtonText: "Subir",
+                    confirmButtonText: "Guardar",
                     cancelButtonText: "Cancelar",
                     focusConfirm: false,
+                    customClass: {
+                        confirmButton: 'bg-[#146b60] text-white px-4 py-2 rounded-lg',
+                        cancelButton: 'text-gray-50 bg-red-600 px-4 py-2 rounded-lg'
+                    },
                     preConfirm: async () => {
                         const fileInput = Swal.getPopup().querySelector("#uploadTitulo");
                         const file = fileInput.files[0];
@@ -258,14 +372,12 @@ export default {
                     },
                     didOpen: () => {
                         const fileInput = Swal.getPopup().querySelector("#uploadTitulo");
-                        const fileNameDisplay = Swal.getPopup().querySelector("#fileName");
+                        const fileNameDisplay = Swal.getPopup().querySelector("#labelText");
 
                         fileInput.addEventListener("change", () => {
-                            if (fileInput.files.length > 0) {
-                                fileNameDisplay.textContent = `Archivo seleccionado: ${fileInput.files[0].name}`;
-                            } else {
-                                fileNameDisplay.textContent = "";
-                            }
+                            fileNameDisplay.textContent = fileInput.files.length > 0
+                                ? `Archivo seleccionado: ${fileInput.files[0].name}`
+                                : "No se ha seleccionado ningún archivo";
                         });
                     }
                 }).then((result) => {

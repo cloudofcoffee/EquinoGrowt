@@ -1,18 +1,18 @@
 <template>
   <div class="flex flex-col min-h-screen">
     <!-- Navbar -->
-    <nav class="bg-teal-950 text-white shadow-md">
+    <nav :class="['text-white shadow-md', userRole === 'admin' ? 'bg-[#0d0d0d]' : 'bg-teal-950']">
       <div class="container mx-auto flex items-center justify-between px-4 py-3">
         <!-- Logo -->
         <router-link to="/" class="flex items-center space-x-2">
           <img src="/img/EquinoGrowt_logo.svg" alt="EquinoGrowt Logo" class="w-40 h-auto" />
         </router-link>
 
-        <!-- Menú móvil -->
-        <button class="md:hidden" @click="menuOpen = !menuOpen">
-          <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
+        <!-- Botón de logout en lugar del menú hamburguesa si está logueado -->
+        <button v-if="isLoggedIn"
+          class="md:hidden bg-red-600 hover:bg-red-700 w-10 h-10 text-white px-3 py-2 rounded-full transition duration-200 flex items-center space-x-2"
+          @click="logout">
+          <i class="fa-solid fa-right-from-bracket text-lg"></i>
         </button>
 
         <!-- Menú escritorio -->
@@ -33,9 +33,13 @@
             <router-link to="/" class="relative inline-block hover:text-[#cfe8e4] transition"
               active-class="text-[#cfe8e4] transition active-link">Inicio</router-link>
           </li>
-          <li v-if="isLoggedIn && userRole === 'doctor'">
-            <router-link to="/pacientes" class="relative inline-block hover:text-[#cfe8e4] transition"
-              active-class="text-[#cfe8e4] transition active-link">Pacientes</router-link>
+          <li v-if="isLoggedIn">
+            <router-link to="/chat" class="relative inline-block hover:text-[#cfe8e4] transition"
+              active-class="text-[#cfe8e4] transition active-link">Chat</router-link>
+          </li>
+          <li v-if="isLoggedIn">
+            <router-link to="/calendario" class="relative inline-block hover:text-[#cfe8e4] transition"
+              active-class="text-[#cfe8e4] transition active-link">Calendario</router-link>
           </li>
           <li v-if="isLoggedIn">
             <router-link to="/perfil" @click="menuOpen = false"
@@ -55,50 +59,6 @@
           </li>
         </ul>
       </div>
-
-      <!-- Menú móvil desplegable -->
-      <transition name="fade">
-        <ul v-if="menuOpen" class="md:hidden bg-teal-900 px-4 pb-4 space-y-3 font-medium">
-          <li v-if="!isLoggedIn">
-            <router-link to="/bienvenidos" @click="menuOpen = false"
-              class="relative inline-block py-2 hover:text-[#cfe8e4]"
-              exact-active-class="text-[#cfe8e4] transition active-link">Bienvenidos</router-link>
-          </li>
-          <li v-if="!isLoggedIn">
-            <router-link to="/login" @click="menuOpen = false"
-              class="relative inline-block py-2 hover:text-[#cfe8e4] transition"
-              active-class="text-[#cfe8e4] transition active-link">Login</router-link>
-          </li>
-          <li v-if="!isLoggedIn">
-            <router-link to="/registro" @click="menuOpen = false"
-              class="relative inline-block py-2 hover:text-[#cfe8e4] transition"
-              active-class="text-[#cfe8e4] transition active-link">Registro</router-link>
-          </li>
-          <li v-if="isLoggedIn">
-            <router-link to="/" @click="menuOpen = false"
-              class="relative inline-block py-2 hover:text-[#cfe8e4] transition"
-              active-class="text-[#cfe8e4] transition active-link">Inicio</router-link>
-          </li>
-          <li v-if="isLoggedIn && userRole === 'doctor'">
-            <router-link to="/pacientes" class="hover:text-[#cfe8e4] transition"
-              active-class="text-[#cfe8e4] transition">Pacientes</router-link>
-          </li>
-          <li v-if="isLoggedIn">
-            <router-link to="/perfil" @click="menuOpen = false"
-              class="flex items-center py-2 px-2 bg-teal-600 hover:bg-teal-700 text-white rounded-md transition duration-200 space-x-2"
-              active-class="bg-teal-700">
-              <img :src="userPhoto" alt="Foto de perfil" class="w-6 h-6 rounded-full object-cover" />
-              <span>Perfil</span>
-            </router-link>
-          </li>
-          <li v-if="isLoggedIn">
-            <button @click="logout"
-              class="w-full text-left py-2 px-2 bg-red-600 hover:bg-red-700 text-white rounded-md transition duration-200">
-              <i class="fa-solid fa-right-from-bracket mr-2"></i> Salir
-            </button>
-          </li>
-        </ul>
-      </transition>
     </nav>
 
     <!-- Contenido -->
@@ -107,7 +67,7 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-[#0e0e0e] text-gray-200 pt-10 border-t">
+    <footer class="hidden lg:block bg-[#0e0e0e] text-gray-200 pt-10 border-t">
       <div class="max-w-7xl mx-auto px-6 md:px-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
 
         <!-- Logo y descripción -->
@@ -130,9 +90,8 @@
             <li v-if="!isLoggedIn"><router-link to="/login" class="hover:underline">Login</router-link></li>
             <li v-if="!isLoggedIn"><router-link to="/registro" class="hover:underline">Registro</router-link></li>
             <li v-if="isLoggedIn"><router-link to="/" class="hover:underline">Inicio</router-link></li>
+            <li v-if="isLoggedIn"><router-link to="/chat" class="hover:underline">Chat</router-link></li>
             <li v-if="isLoggedIn"><router-link to="/perfil" class="hover:underline">Perfil</router-link></li>
-            <li v-if="isLoggedIn && userRole === 'doctor'"><router-link to="/pacientes"
-                class="hover:underline">Pacientes</router-link></li>
           </ul>
         </div>
 
@@ -170,6 +129,64 @@
         &copy; 2025 <span class="font-semibold">EquinoGrowt</span>. Todos los derechos reservados.
       </div>
     </footer>
+
+    <!-- Barra de navegación inferior -->
+    <div class="lg:hidden fixed bottom-0 w-full bg-teal-800 shadow-xl rounded-t-2xl z-50">
+      <div class="flex justify-around items-center py-3 px-4">
+
+        <!-- Bienvenidos -->
+        <router-link v-if="!isLoggedIn" to="/bienvenidos" class="flex flex-col items-center transition-all duration-200"
+          :class="{ 'text-white': $route.path !== '/bienvenidos', 'text-teal-200': $route.path === '/bienvenidos' }">
+          <i class="fa-solid fa-door-open text-2xl mb-1"></i>
+          <span class="text-xs font-medium">Bienvenidos</span>
+        </router-link>
+
+        <!-- Login -->
+        <router-link v-if="!isLoggedIn" to="/login" class="flex flex-col items-center transition-all duration-200"
+          :class="{ 'text-white': $route.path !== '/login', 'text-teal-200': $route.path === '/login' }">
+          <i class="fa-solid fa-right-to-bracket text-2xl mb-1"></i>
+          <span class="text-xs font-medium">Login</span>
+        </router-link>
+
+        <!-- Registro -->
+        <router-link v-if="!isLoggedIn" to="/registro" class="flex flex-col items-center transition-all duration-200"
+          :class="{ 'text-white': $route.path !== '/registro', 'text-teal-200': $route.path === '/registro' }">
+          <i class="fa-solid fa-user-plus text-2xl mb-1"></i>
+          <span class="text-xs font-medium">Registro</span>
+        </router-link>
+
+        <!-- Inicio -->
+        <router-link v-if="isLoggedIn" to="/" class="flex flex-col items-center transition-all duration-200"
+          :class="{ 'text-white': $route.path !== '/', 'text-teal-200': $route.path === '/' }">
+          <i class="fa-solid fa-house text-2xl mb-1"></i>
+          <span class="text-xs font-medium">Inicio</span>
+        </router-link>
+
+        <!-- Mensajes -->
+        <router-link v-if="isLoggedIn" to="/chat" class="flex flex-col items-center transition-all duration-200"
+          :class="{ 'text-white': $route.path !== '/chat', 'text-teal-200': $route.path === '/chat' }">
+          <i class="fa-solid fa-comment-dots text-2xl mb-1"></i>
+          <span class="text-xs font-medium">Mensajes</span>
+        </router-link>
+
+        <!-- Calendario -->
+        <router-link v-if="isLoggedIn" to="/calendario" class="flex flex-col items-center transition-all duration-200"
+          :class="{ 'text-white': $route.path !== '/calendario', 'text-teal-200': $route.path === '/calendario' }">
+          <i class="fa-solid fa-calendar-days text-2xl mb-1"></i>
+          <span class="text-xs font-medium">Calendario</span>
+        </router-link>
+
+        <!-- Perfil -->
+        <router-link v-if="isLoggedIn" to="/perfil" class="flex flex-col items-center transition-all duration-200"
+          :class="{ 'text-white': $route.path !== '/perfil', 'text-teal-200': $route.path === '/perfil' }">
+          <img :src="userPhoto" alt="Foto de perfil"
+            class="w-8 h-8 rounded-full object-cover mb-1 border-2 border-teal-200 shadow-md" />
+          <span class="text-xs font-medium">Perfil</span>
+        </router-link>
+
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -177,8 +194,6 @@
 <script>
 import { getAuth, signOut } from "firebase/auth";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
-import { ref } from "vue";
-const menuOpen = ref(false);
 
 export default {
   data() {
@@ -187,14 +202,20 @@ export default {
       isLoggedIn: false,
       userEmail: "",
       userRole: "",
-      userPhoto: "/img/default-user.jpg"
+      userPhoto: "/img/default-user.jpg",
     };
   },
   watch: {
-    $route(to) {
+    $route(to, from) {
       this.menuOpen = false;
-      const rutasOcultas = ["/login", "/registro", "/bienvenidos"];
-      this.mostrarBarraInferior = !rutasOcultas.includes(to.path);
+    },
+  },
+  methods: {
+    async logout() {
+      const auth = getAuth();
+      await signOut(auth);
+      this.isLoggedIn = false;
+      this.$router.push("/login");
     },
   },
   created() {
@@ -217,14 +238,6 @@ export default {
       }
     });
   },
-  methods: {
-    async logout() {
-      const auth = getAuth();
-      await signOut(auth);
-      this.isLoggedIn = false;
-      this.$router.push("/login");
-    },
-  },
 };
 </script>
 
@@ -241,6 +254,8 @@ main {
   align-content: center;
   min-height: 77.8vh;
   margin: auto;
+  padding-bottom: 5rem;
+  /* espacio para la barra inferior */
 }
 
 .fade-enter-active,

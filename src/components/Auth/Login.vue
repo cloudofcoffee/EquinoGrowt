@@ -6,12 +6,14 @@
 
         <!-- Columna Izquierda: Formulario -->
         <div :class="{ 'opacity-30 pointer-events-none': cargando }"
-            class="md:w-1/2 w-full p-10 transition-opacity duration-300">
+            class="md:w-1/2 w-full p-10 transition-opacity duration-300 brand-pattern">
             <h2 class="text-2xl font-semibold text-[#146b60] mb-6 text-center md:text-left">
                 Iniciar Sesión
             </h2>
 
             <form @submit.prevent="login" class="space-y-6 text-left">
+                <ErrorMessage v-if="errorMessage" :message="errorMessage" />
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Correo electrónico</label>
                     <input type="email" v-model="email" required
@@ -40,24 +42,28 @@
             <img src="/img/EquinoGrowt.svg" alt="Logo"
                 class="bg-white w-36 h-36 mb-6 rounded-full border-4 border-white shadow-md transition-transform duration-300 hover:scale-105" />
             <h3 class="text-3xl font-extrabold text-center leading-tight">
-                Bienvenido de nuevo <br />
-                a EquinoGrowt
+                ¡Hola usuario!<br>
+                Bienvenido de nuevo
             </h3>
             <p class="mt-4 text-center">
                 ¿No tenés una cuenta?<br class="md:hidden">
-                <router-link to="/registro" class="ml-1 text-blue-500 hover:text-blue-400 transition font-semibold">Regístrate aca</router-link>
+                <router-link to="/registro"
+                    class="ml-1 text-blue-500 hover:text-blue-400 transition font-semibold">Regístrate aca</router-link>
             </p>
         </div>
     </div>
 </template>
 
-<script>import Loader from "@/components/Loader.vue";
+<script>
+import Loader from "@/components/Loader.vue";
+import ErrorMessage from "@/components/ErrorMessage.vue";
 import Swal from "sweetalert2";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 
 export default {
     components: {
         Loader,
+        ErrorMessage,
     },
     data() {
         return {
@@ -86,7 +92,26 @@ export default {
 
                 this.$router.push("/"); // Redirige a la página principal
             } catch (error) {
-                this.errorMessage = "Error al iniciar sesión: " + error.message;
+                // Extraer el código del error de Firebase
+                const match = error.message.match(/\(auth\/[^\)]+\)/);
+                const code = match ? match[0].replace(/[()]/g, '') : null;
+
+                // Mapa de errores legibles
+                const errorMap = {
+                    'auth/invalid-login-credentials': 'Correo o contraseña incorrectos.',
+                    'auth/user-not-found': 'No existe una cuenta con este correo.',
+                    'auth/wrong-password': 'La contraseña es incorrecta.',
+                    'auth/too-many-requests': 'Demasiados intentos. Intenta más tarde.',
+                    'auth/network-request-failed': 'Error de red. Verificá tu conexión.',
+                    'auth/email-already-in-use': 'Este correo ya está registrado.',
+                    'auth/invalid-email': 'El correo no es válido.',
+                    'auth/weak-password': 'La contraseña debe tener al menos 6 caracteres.',
+                    'auth/internal-error': 'Error interno. Intenta nuevamente.',
+                    'auth/missing-password': 'Falta ingresar la contraseña.',
+                    'auth/missing-email': 'Falta ingresar el correo electrónico.',
+                };
+
+                this.errorMessage = errorMap[code] || 'Ocurrió un error al iniciar sesión. Intentá nuevamente.';
 
                 Swal.fire({
                     title: "Error",
