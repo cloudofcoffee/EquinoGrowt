@@ -151,6 +151,22 @@
         <i class="fa-solid fa-pen-to-square text-base"></i>
       </button>
     </div>
+
+    <!-- Trivias guardadas -->
+    <div v-if="user.datos?.length" class="mt-10 border border-teal-200 bg-white rounded-2xl p-6 shadow-md">
+      <h3 class="text-xl font-semibold text-[#146b60] mb-4 flex items-center gap-2">
+        <i class="fas fa-horse-head"></i> Trivias guardadas
+      </h3>
+      <ul class="space-y-3">
+        <li v-for="(trivia, index) in user.datos" :key="index"
+          class="bg-teal-50 border border-teal-100 rounded-lg px-4 py-3 text-sm text-gray-800 shadow flex justify-between items-start gap-4">
+          <span class="flex-1">{{ trivia }}</span>
+          <button @click="eliminarTrivia(index)" class="text-red-600 hover:text-red-800 transition text-base">
+            <i class="fas fa-trash"></i>
+          </button>
+        </li>
+      </ul>
+    </div>
   </div>
 </template>
 
@@ -409,6 +425,42 @@ export default {
         obraSocial: this.user.obraSocial || "",
         fechaNacimiento: this.user.fechaNacimiento?.split("T")[0] || "",
       };
+    },
+
+    async eliminarTrivia(index) {
+      try {
+        const auth = getAuth();
+        const userActual = auth.currentUser;
+        if (!userActual) return;
+
+        const db = getFirestore();
+        const docRef = doc(db, "Tipo_de_usuario", userActual.uid);
+
+        // Eliminamos la trivia del array local
+        this.user.datos.splice(index, 1);
+
+        // Actualizamos el documento en Firestore
+        await updateDoc(docRef, {
+          datos: this.user.datos,
+        });
+
+        // Mensaje de confirmación
+        Swal.fire({
+          icon: 'success',
+          title: 'Trivia eliminada',
+          timer: 1500,
+          showConfirmButton: false,
+        });
+      } catch (error) {
+        console.error("Error al eliminar la trivia:", error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'No se pudo eliminar la trivia.',
+          timer: 2500,
+          showConfirmButton: false,
+        });
+      }
     },
 
     formatFecha(fecha) {

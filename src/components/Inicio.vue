@@ -214,6 +214,33 @@
           class="w-full rounded-lg max-w-xl object-cover shadow" />
       </div>
     </div>
+
+    <!-- Trivia del Día -->
+    <div v-if="tipo === 'paciente' || tipo === 'doctor'"
+      class="border-2 border-teal-300 bg-white rounded-2xl p-6 shadow-md w-full mx-auto mt-6">
+      <div class="flex items-center gap-2 text-teal-700 mb-4">
+        <i class="fas fa-horse-head text-lg"></i>
+        <h3 class="text-lg font-semibold">Trivia Ecuestre del Día</h3>
+      </div>
+
+      <div class="bg-teal-50 border border-teal-100 p-4 rounded-xl text-gray-800 mb-4">
+        ❓ {{ triviaActual }}
+      </div>
+
+      <div class="flex justify-between">
+        <button @click="verSiguienteTrivia"
+          class="flex items-center gap-2 text-sm bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-xl transition-all">
+          <i class="fas fa-forward"></i>
+          <span class="hidden md:inline">Ver siguiente</span>
+        </button>
+
+        <button @click="guardarTrivia"
+          class="flex items-center gap-2 text-sm bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded-xl transition-all">
+          <i class="fas fa-heart"></i>
+          <span class="hidden md:inline">Guardar</span>
+        </button>
+      </div>
+    </div>
   </div>
 
   <!-- Modal Agregar Paciente -->
@@ -311,6 +338,61 @@ export default {
       notaDelDia: '',
       guardandoNota: false,
       notaGuardada: false,
+      triviasPaciente: [
+        "Acariciar a un caballo durante al menos 5 minutos puede reducir los niveles de cortisol.",
+        "Los caballos pueden sentir tu estado emocional a través de tu postura corporal y tono de voz.",
+        "Cuando un caballo apoya su cabeza sobre vos, muestra afecto y confianza.",
+        "Los caballos tienen una memoria emocional: recuerdan cómo los hiciste sentir.",
+        "Un caballo puede reconocer a una persona incluso después de varios años sin verla.",
+        "Cepillar al caballo genera vínculos de confianza y puede actuar como una forma de meditación activa.",
+        "Los caballos bostezan, suspiran y relajan la mandíbula cuando se sienten cómodos y en paz.",
+        "Las orejas de un caballo se mueven como pequeñas antenas: si están hacia vos, está prestando atención.",
+        "El simple acto de caminar al lado del caballo puede regular la respiración y mejorar la conciencia corporal.",
+        "Los caballos no juzgan: su comportamiento refleja el presente y la energía que les transmitís.",
+        "Abrazar el cuello de un caballo puede generar una sensación de contención emocional profunda.",
+        "El calor corporal de un caballo puede ser reconfortante para personas con ansiedad.",
+        "Montar al paso ayuda a estimular ambos hemisferios del cerebro de manera alterna.",
+        "Los caballos usan más de 17 expresiones faciales diferentes, ¡algunas parecidas a las humanas!",
+        "Estar en un entorno natural con caballos favorece la producción de serotonina (la “hormona del bienestar”).",
+        "Los caballos detectan microexpresiones y son muy sensibles a los cambios sutiles de humor.",
+        "Las caminatas con caballo pueden ayudar a regular el tono muscular y mejorar el equilibrio emocional.",
+        "Cuando un caballo te “responde” a una caricia moviendo el labio superior, está disfrutando el momento.",
+        "Muchos caballos disfrutan que les hablen: reconocen el tono suave y tranquilo.",
+        "En culturas antiguas, los caballos eran considerados animales de sanación y guía emocional.",
+        "La presencia constante de un mismo caballo puede generar un vínculo terapéutico muy poderoso.",
+        " Los caballos aprenden con el refuerzo positivo, igual que las personas.",
+        "Un caballo curioso que se acerca, es una invitación a construir un vínculo.",
+        "Observar el movimiento rítmico de un caballo puede calmar estados de agitación o distracción.",
+        "Los caballos pueden sincronizar su ritmo cardíaco con el de las personas cuando están en calma cerca de ellas.",
+      ],
+      triviasProfesional: [
+        "La interacción con caballos aumenta la producción de oxitocina.",
+        "Niños con TEA mejoran la comunicación no verbal al trabajar con caballos.",
+        "El caballo actúa como un espejo emocional del paciente.",
+        "En contextos terapéuticos, el caballo actúa como un espejo emocional del paciente",
+        "Las sesiones con equinos pueden generar mejoras en la autorregulación emocional en pacientes con TDAH.",
+        "La observación de un caballo en calma puede activar el sistema nervioso parasimpático.",
+        "La terapia asistida con caballos se ha usado en veteranos con TEPT con resultados positivos.",
+        "El uso de caballos en contextos de discapacidad promueve la autonomía y la autoeficacia.",
+        "El contacto físico con el caballo estimula el sistema propioceptivo y táctil",
+        "En neurodivergencias, el trabajo con caballos favorece la atención plena (mindfulness).",
+        "Los caballos no entienden el lenguaje verbal, pero reaccionan con precisión al lenguaje corporal.",
+        "El caballo no discrimina por aspecto, condición o edad: esto fortalece la autoestima del paciente.",
+        "El movimiento tridimensional del lomo del caballo estimula el tronco encefálico.",
+        "Estudios muestran mejoras en habilidades sociales en pacientes con autismo tras 10 sesiones asistidas con caballos",
+        "Las intervenciones asistidas con animales pueden mejorar la motivación intrínseca del paciente.",
+        "El ritmo del paso del caballo regula ritmos biológicos: respiración, latido y tono muscular.",
+        "La equinoterapia estimula áreas del cerebro relacionadas con la planificación y la atención sostenida.",
+        "El silencio en presencia del caballo muchas veces genera un espacio terapéutico potente.",
+        "La seguridad que transmite el caballo puede ayudar a romper barreras relacionales con pacientes retraídos.",
+        "El contacto con animales activa la amígdala de forma positiva, reduciendo respuestas de miedo.",
+        "El juego estructurado con caballos mejora funciones ejecutivas en niños con dificultades cognitivas.",
+        "Cada caballo tiene una “personalidad terapéutica” única que puede ajustarse a diferentes perfiles de pacientes.",
+        "La participación activa del paciente en la preparación del caballo refuerza su rol como sujeto activo del proceso.",
+        "La conexión emocional con un caballo puede generar recuerdos positivos duraderos que refuercen la continuidad del tratamiento.",
+        "En equinoterapia, el paso del caballo imita el patrón de la marcha humana, estimulando el equilibrio y la coordinación.",
+      ],
+      indiceTrivia: 0,
     };
   },
   computed: {
@@ -353,6 +435,10 @@ export default {
     },
     pacientesDelDia() {
       return this.pacientes.filter(p => p.tipo === 'paciente');
+    },
+    triviaActual() {
+      const trivias = this.tipo === 'paciente' ? this.triviasPaciente : this.triviasProfesional;
+      return trivias[this.indiceTrivia];
     }
   },
   watch: {
@@ -801,6 +887,73 @@ export default {
       } catch (error) {
         console.error("Error al cargar la nota del día:", error);
       }
+    },
+
+    // Datos
+    calcularIndicePorFecha() {
+      const fecha = new Date();
+      const seed = fecha.getFullYear() * 10000 + (fecha.getMonth() + 1) * 100 + fecha.getDate();
+      const total = this.tipo === 'paciente' ? this.triviasPaciente.length : this.triviasProfesional.length;
+      return seed % total;
+    },
+    verSiguienteTrivia() {
+      const trivias = this.tipo === 'paciente' ? this.triviasPaciente : this.triviasProfesional;
+      this.indiceTrivia = (this.indiceTrivia + 1) % trivias.length;
+    },
+    async guardarTrivia() {
+      try {
+        const auth = getAuth();
+        const user = auth.currentUser;
+        if (!user) throw new Error("Usuario no autenticado");
+
+        const db = getFirestore();
+        const userRef = doc(db, 'Tipo_de_usuario', user.uid);
+        const docSnap = await getDoc(userRef);
+
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          const triviaActual = this.triviaActual;
+
+          // Obtener el array existente o iniciarlo
+          const datosGuardados = Array.isArray(data.datos) ? data.datos : [];
+
+          // Si ya está guardada, no duplicar
+          if (datosGuardados.includes(triviaActual)) {
+            return Swal.fire({
+              icon: 'info',
+              title: 'Ya guardada',
+              text: 'Esta trivia ya está en tus datos guardados.',
+              timer: 2000,
+              showConfirmButton: false,
+              timerProgressBar: true
+            });
+          }
+
+          // Agregar nueva trivia
+          const nuevosDatos = [...datosGuardados, triviaActual];
+
+          // Guardar en Firestore
+          await updateDoc(userRef, {
+            datos: nuevosDatos
+          });
+
+          Swal.fire({
+            icon: 'success',
+            title: 'Trivia guardada',
+            text: 'Se guardó correctamente en tus datos. 💾',
+            timer: 2000,
+            showConfirmButton: false,
+            timerProgressBar: true
+          });
+        }
+      } catch (error) {
+        console.error("Error al guardar la trivia:", error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Ocurrió un error al guardar la trivia.'
+        });
+      }
     }
   },
 
@@ -858,6 +1011,7 @@ export default {
         await this.cargarNotaDelDia();
       }
     }
+    this.indiceTrivia = this.calcularIndicePorFecha();
 
     this.loading = false;
   }
