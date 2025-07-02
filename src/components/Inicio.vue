@@ -217,7 +217,7 @@
 
     <!-- Trivia del Día -->
     <div v-if="tipo === 'paciente' || tipo === 'doctor'"
-      class="border-2 border-teal-300 bg-white rounded-2xl p-6 shadow-md w-full mx-auto mt-6">
+      class="border-2 border-teal-200 bg-white rounded-2xl p-6 shadow-md w-full mx-auto mt-6">
       <div class="flex items-center gap-2 text-teal-700 mb-4">
         <i class="fas fa-horse-head text-lg"></i>
         <h3 class="text-lg font-semibold">Trivia Ecuestre del Día</h3>
