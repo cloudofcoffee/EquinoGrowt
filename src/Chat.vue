@@ -89,7 +89,7 @@
         <div class="p-6 border-t bg-white">
           <form @submit.prevent="enviarMensaje" class="flex gap-3">
             <input v-model="nuevoMensaje" type="text" placeholder="Escribe un mensaje"
-              class="flex-1 border border-gray-300 rounded-full px-5 py-3 text-base focus:outline-none focus:border-[#146b60] focus:ring-2 focus:ring-[#146b60]" />
+              class="flex-1 border border-gray-300 rounded-full px-5 py-3 text-base focus:outline-none focus:ring-2 focus:ring-[#146b60] focus:border-[#146b60]" />
             <button type="submit" class="bg-[#146b60] text-white px-6 py-3 rounded-full text-base">
               <i class="fa-solid fa-paper-plane"></i>
             </button>
