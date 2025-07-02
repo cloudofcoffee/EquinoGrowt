@@ -420,7 +420,14 @@ export default {
         this.modalAbierto = false;
       } catch (error) {
         console.error("Error al asignar paciente:", error);
-        await Swal.fire("Error", "No se pudo asignar el paciente.", "error");
+        await Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "No se pudo asignar el paciente.",
+          timerProgressBar: true,
+          timer: 2500,
+          showConfirmButton: false
+        });
       } finally {
         this.accionando = false; // Ocultar loader
       }
@@ -433,7 +440,9 @@ export default {
         icon: 'warning',
         showCancelButton: true,
         confirmButtonText: 'Sí, eliminar',
-        cancelButtonText: 'Cancelar'
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#146b60',
+        cancelButtonColor: '#e53e3e',
       });
 
       if (!confirm.isConfirmed) return;
@@ -484,7 +493,14 @@ export default {
         this.turnos = turnos;
       } catch (error) {
         console.error("Error al eliminar paciente:", error);
-        await Swal.fire("Error", "No se pudo eliminar el paciente.", "error");
+        await Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "No se pudo eliminar el paciente.",
+          timerProgressBar: true,
+          timer: 2500,
+          showConfirmButton: false
+        });
       } finally {
         this.accionando = false;
       }

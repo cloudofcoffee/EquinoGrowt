@@ -86,7 +86,8 @@ export default {
                     title: "¡Inicio de sesión exitoso!",
                     text: "Has iniciado sesión correctamente.",
                     icon: "success",
-                    confirmButtonText: "Aceptar",
+                    timerProgressBar: true,
+                    showConfirmButton: false,
                     timer: 3000,
                 });
 
@@ -117,7 +118,9 @@ export default {
                     title: "Error",
                     text: this.errorMessage,
                     icon: "error",
-                    confirmButtonText: "Intentar de nuevo",
+                    timerProgressBar: true,
+                    timer: 3000,
+                    showConfirmButton: false
                 });
             } finally {
                 this.cargando = false;

@@ -164,6 +164,9 @@ export default {
                     text: tipo === "doctor"
                         ? "Tu solicitud como doctor fue enviada. El equipo revisará tu título."
                         : "Tu perfil fue creado correctamente.",
+                    timerProgressBar: true,
+                    timer: 3000,
+                    showConfirmButton: false
                 });
 
                 this.$router.push("/");

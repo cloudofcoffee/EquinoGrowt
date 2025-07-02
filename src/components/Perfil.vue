@@ -229,7 +229,14 @@ export default {
 
     async guardarNombre() {
       if (!this.nuevoNombre.trim()) {
-        Swal.fire("Error", "El nombre no puede estar vacío.", "error");
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "El nombre no puede estar vacío.",
+          timerProgressBar: true,
+          timer: 2500,
+          showConfirmButton: false
+        });
         return;
       }
 
@@ -269,10 +276,24 @@ export default {
         });
 
         this.user.nombre = this.nuevoNombre;
-        Swal.fire("¡Actualizado!", "Tu perfil fue actualizado con éxito.", "success");
+        Swal.fire({
+          icon: "success",
+          title: "¡Actualizado!",
+          text: "Tu perfil fue actualizado con éxito.",
+          timerProgressBar: true,
+          timer: 3000,
+          showConfirmButton: false
+        });
       } catch (error) {
         console.error("Error al guardar perfil:", error);
-        Swal.fire("Error", "Ocurrió un problema al guardar el perfil.", "error");
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Ocurrió un problema al guardar el perfil.",
+          timerProgressBar: true,
+          timer: 2500,
+          showConfirmButton: false
+        });
       } finally {
         this.cargando = false;
       }
@@ -290,6 +311,8 @@ export default {
         showCancelButton: true,
         confirmButtonText: "Actualizar",
         cancelButtonText: "Cancelar",
+        confirmButtonColor: '#146b60',
+        cancelButtonColor: '#e53e3e',
         focusConfirm: false,
         preConfirm: () => {
           const password = document.getElementById("nueva-password").value;
@@ -316,10 +339,24 @@ export default {
           this.cargando = true;
           const auth = getAuth();
           await updatePassword(auth.currentUser, formValues);
-          Swal.fire("¡Listo!", "Tu contraseña fue actualizada con éxito.", "success");
+          Swal.fire({
+            icon: "success",
+            title: "¡Listo!",
+            text: "Tu contraseña fue actualizada con éxito.",
+            timerProgressBar: true,
+            timer: 2500,
+            showConfirmButton: false
+          });
         } catch (error) {
           console.error("Error al cambiar contraseña:", error);
-          Swal.fire("Error", "No se pudo cambiar la contraseña. Reautentícate si es necesario.", "error");
+          Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: "No se pudo cambiar la contraseña. Reautentícate si es necesario.",
+            timerProgressBar: true,
+            timer: 2500,
+            showConfirmButton: false
+          });
         } finally {
           this.cargando = false;
         }
@@ -339,10 +376,24 @@ export default {
 
         this.modoEdicion = false; // 👈 Esta línea cierra el modo edición
 
-        Swal.fire("¡Actualizado!", "Tu información adicional fue guardada.", "success");
+        Swal.fire({
+          icon: "success",
+          title: "¡Actualizado!",
+          text: "Tu información adicional fue guardada.",
+          timerProgressBar: true,
+          timer: 2500,
+          showConfirmButton: false
+        });
       } catch (error) {
         console.error("Error al guardar info extra:", error);
-        Swal.fire("Error", "Ocurrió un problema al guardar la información.", "error");
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Ocurrió un problema al guardar la información.",
+          timerProgressBar: true,
+          timer: 2500,
+          showConfirmButton: false
+        });
       } finally {
         this.cargando = false;
       }

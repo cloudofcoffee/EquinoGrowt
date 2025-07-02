@@ -10,7 +10,7 @@ body {
   position: relative;
   overflow: hidden;
   z-index: 0;
-  background-image: url('/img/patron-fondo.png');
+  background-image: url('/img/patron-fondo.svg');
   background-repeat: repeat;
   background-size: cover;
   background-position: center;
