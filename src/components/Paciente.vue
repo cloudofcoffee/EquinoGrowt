@@ -272,7 +272,7 @@ export default {
             this.paciente = {
                 ...pacienteData,
                 turnoTexto: turnoAsignado
-                    ? `Turno asignado el ${this.formatoFecha(turnoAsignado.fecha, false)} a las ${turnoAsignado.horario}`
+                    ? `Turno asignado el ${this.formatoFecha(turnoAsignado.fecha, false)}`
                     : "Sin turno asignado",
                 foto: pacienteData.photoURL || null,
             };
