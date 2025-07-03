@@ -224,7 +224,7 @@
       </div>
 
       <div class="bg-teal-50 border border-teal-100 p-4 rounded-xl text-gray-800 mb-4">
-        ❓ {{ triviaActual }}
+        {{ triviaActual }}
       </div>
 
       <div class="flex justify-between">
