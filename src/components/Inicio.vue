@@ -9,7 +9,7 @@
       <div class="mb-6">
         <div class="flex justify-between items-center">
           <div>
-            <h2 class="text-2xl font-bold text-[#146b60]">Hola D.r {{ nombre }}</h2>
+            <h2 class="text-2xl font-bold text-[#146b60]">Hola Dr. {{ nombre }}</h2>
             <p class="text-gray-500">{{ fechaActual }}</p>
           </div>
           <img :src="foto" alt="Foto perfil" class="w-12 h-12 rounded-full object-cover border-2 border-[#146b60]" />
