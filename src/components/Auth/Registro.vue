@@ -28,32 +28,48 @@
             <ErrorMessage v-if="errorMessage" :message="errorMessage" class="mb-4" />
 
             <form @submit.prevent="register" class="space-y-6">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Nombre completo</label>
-                    <input type="text" v-model="name" required
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#146b60] transition" />
+
+                <!-- Nombre completo -->
+                <div class="relative">
+                    <input id="name" type="text" v-model="name" required placeholder=" "
+                        class="peer w-full px-4 py-3 border border-gray-300 rounded-lg placeholder-transparent focus:outline-none focus:ring-2 focus:ring-[#146b60] focus:border-transparent" />
+                    <label for="name"
+                        class="absolute left-3 top-3 text-gray-500 text-sm bg-white px-2 rounded transition-all duration-200 cursor-text peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:top-[-0.6rem] peer-focus:text-sm peer-focus:text-[#146b60] peer-valid:top-[-0.6rem] peer-valid:text-sm peer-valid:text-[#146b60]">
+                        Nombre completo
+                    </label>
                 </div>
 
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Correo electrónico</label>
-                    <input type="email" v-model="email" required
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#146b60] transition" />
+                <!-- Correo electrónico -->
+                <div class="relative">
+                    <input id="email" type="email" v-model="email" required placeholder=" "
+                        class="peer w-full px-4 py-3 border border-gray-300 rounded-lg placeholder-transparent focus:outline-none focus:ring-2 focus:ring-[#146b60] focus:border-transparent" />
+                    <label for="email"
+                        class="absolute left-3 top-3 text-gray-500 text-sm bg-white px-2 rounded transition-all duration-200 cursor-text peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:top-[-0.6rem] peer-focus:text-sm peer-focus:text-[#146b60] peer-valid:top-[-0.6rem] peer-valid:text-sm peer-valid:text-[#146b60]">
+                        Correo electrónico
+                    </label>
                 </div>
 
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
-                    <input :type="mostrarPassword ? 'text' : 'password'" v-model="password" required
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#146b60] transition" />
+                <!-- Contraseña -->
+                <div class="relative">
+                    <input id="password" :type="mostrarPassword ? 'text' : 'password'" v-model="password" required
+                        placeholder=" "
+                        class="peer w-full px-4 py-3 border border-gray-300 rounded-lg placeholder-transparent focus:outline-none focus:ring-2 focus:ring-[#146b60] focus:border-transparent" />
+                    <label for="password"
+                        class="absolute left-3 top-3 text-gray-500 text-sm bg-white px-2 rounded transition-all duration-200 cursor-text peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:top-[-0.6rem] peer-focus:text-sm peer-focus:text-[#146b60] peer-valid:top-[-0.6rem] peer-valid:text-sm peer-valid:text-[#146b60]">
+                        Contraseña
+                    </label>
                     <button type="button" @click="toggleMostrarPassword"
-                        class="text-sm text-[#146b60] mt-1 hover:underline">
+                        class="bottom-[-1.8rem] text-sm text-[#146b60] hover:underline">
                         {{ mostrarPassword ? 'Ocultar' : 'Mostrar' }} contraseña
                     </button>
                 </div>
 
+                <!-- Botón de registro -->
                 <button type="submit"
                     class="w-full bg-[#146b60] text-white py-3 rounded-lg hover:bg-[#0e574e] transition duration-300 font-semibold">
                     Crear cuenta
                 </button>
+
             </form>
         </div>
     </div>
