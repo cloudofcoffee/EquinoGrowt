@@ -77,6 +77,32 @@
           </button>
         </div>
       </div>
+
+      <!-- Trivia del Día -->
+      <div class="border-2 border-teal-200 bg-white rounded-2xl p-6 shadow-md w-full mx-auto mt-6">
+        <div class="flex items-center gap-2 text-teal-700 mb-4">
+          <i class="fas fa-horse-head text-lg"></i>
+          <h3 class="text-lg font-semibold">Trivia Ecuestre del Día</h3>
+        </div>
+
+        <div class="bg-teal-50 border border-teal-100 p-4 rounded-xl text-gray-800 mb-4">
+          {{ triviaActual }}
+        </div>
+
+        <div class="flex justify-between">
+          <button @click="verSiguienteTrivia"
+            class="flex items-center gap-2 text-sm bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-xl transition-all">
+            <i class="fas fa-forward"></i>
+            <span class="hidden md:inline">Ver siguiente</span>
+          </button>
+
+          <button @click="guardarTrivia"
+            class="flex items-center gap-2 text-sm bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded-xl transition-all">
+            <i class="fas fa-heart"></i>
+            <span class="hidden md:inline">Guardar</span>
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- Vista Paciente -->
@@ -116,13 +142,17 @@
             <div class="grid grid-cols-7 gap-3 h-52 transition-all duration-300 ease-in-out">
               <div v-for="dia in diasSemana" :key="dia.fecha"
                 class="flex flex-col items-center justify-end text-center h-full">
-                <!-- Barra -->
-                <div class="w-10 h-32 rounded-full flex items-top py-3 justify-center transition-all duration-300"
-                  :class="[
-                    estadoColorClase(dia.estadoFusionado),
-                    dia.fecha === diaSeleccionado ? 'ring-2 ring-[#146b60] scale-105' : ''
-                  ]">
-                  <i :class="estadosAnimicos.find(e => e.valor === dia.estadoFusionado)?.icono" class="text-xl"></i>
+                <!-- Barra múltiple con curvatura -->
+                <div class="w-10 h-32 rounded-full overflow-hidden flex flex-col transition-all duration-300"
+                  :class="dia.fecha === diaSeleccionado ? 'ring-2 ring-[#146b60] scale-105' : ''">
+                  <div v-for="(estado, index) in dia.estados" :key="estado + index"
+                    class="w-full flex items-center justify-center text-xs" :class="[
+                      estadoColorClase(estado),
+                      index === 0 ? 'rounded-t-full' : '',
+                      index === dia.estados.length - 1 ? 'rounded-b-full' : ''
+                    ]" :style="`height: ${100 / dia.estados.length}%`">
+                    <i :class="estadosAnimicos.find(e => e.valor === estado)?.icono" class="text-sm"></i>
+                  </div>
                 </div>
 
                 <!-- Día -->
@@ -140,15 +170,16 @@
               class="absolute inset-0 z-20 bg-white/80 flex items-center justify-center rounded-2xl" />
             <h3 class="text-lg font-semibold text-[#146b60] mb-2">¿Cómo te sentís hoy?</h3>
             <div class="flex flex-wrap gap-2">
-              <button v-for="estado in estadosAnimicos" :key="estado.valor" :disabled="guardandoEstado"
-                @click="guardarEstadoAnimo(estado.valor)" :class="[
-                  'flex items-center gap-2 px-2 py-2 rounded-full text-sm font-semibold shadow-sm transition-all hover:scale-105',
+              <button v-for="estado in estadosAnimicos" :key="estado.valor"
+                :disabled="guardandoEstado || esIncompatible(estado.valor)" @click="guardarEstadoAnimo(estado.valor)"
+                :class="[
+                  'flex items-center gap-2 px-2 py-2 rounded-full text-sm font-semibold shadow-sm transition-all',
                   estadoColorClase(estado.valor),
-                  diaSeleccionadoEstados.includes(estado.valor) ? 'ring-2 ring-[#146b60]' : ''
+                  diaSeleccionadoEstados.includes(estado.valor) ? 'ring-2 ring-[#146b60]' : '',
+                  esIncompatible(estado.valor) ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'
                 ]">
                 <i :class="estado.icono"></i> {{ estado.nombre }}
               </button>
-
             </div>
           </div>
 
@@ -205,6 +236,32 @@
           </div>
         </div>
       </div>
+
+      <!-- Trivia del Día -->
+      <div class="border-2 border-teal-200 bg-white rounded-2xl p-6 shadow-md w-full mx-auto mt-6">
+        <div class="flex items-center gap-2 text-teal-700 mb-4">
+          <i class="fas fa-horse-head text-lg"></i>
+          <h3 class="text-lg font-semibold">Trivia Ecuestre del Día</h3>
+        </div>
+
+        <div class="bg-teal-50 border border-teal-100 p-4 rounded-xl text-gray-800 mb-4">
+          {{ triviaActual }}
+        </div>
+
+        <div class="flex justify-between">
+          <button @click="verSiguienteTrivia"
+            class="flex items-center gap-2 text-sm bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-xl transition-all">
+            <i class="fas fa-forward"></i>
+            <span class="hidden md:inline">Ver siguiente</span>
+          </button>
+
+          <button @click="guardarTrivia"
+            class="flex items-center gap-2 text-sm bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded-xl transition-all">
+            <i class="fas fa-heart"></i>
+            <span class="hidden md:inline">Guardar</span>
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- Vista Admin -->
@@ -212,33 +269,6 @@
       <div class="w-full h-full flex justify-center items-center bg-white">
         <img src="/img/estamos-trabajando.png" alt="Estamos trabajando en ello"
           class="w-full rounded-lg max-w-xl object-cover shadow" />
-      </div>
-    </div>
-
-    <!-- Trivia del Día -->
-    <div v-if="tipo === 'paciente' || tipo === 'doctor'"
-      class="border-2 border-teal-200 bg-white rounded-2xl p-6 shadow-md w-full mx-auto mt-6">
-      <div class="flex items-center gap-2 text-teal-700 mb-4">
-        <i class="fas fa-horse-head text-lg"></i>
-        <h3 class="text-lg font-semibold">Trivia Ecuestre del Día</h3>
-      </div>
-
-      <div class="bg-teal-50 border border-teal-100 p-4 rounded-xl text-gray-800 mb-4">
-        {{ triviaActual }}
-      </div>
-
-      <div class="flex justify-between">
-        <button @click="verSiguienteTrivia"
-          class="flex items-center gap-2 text-sm bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-xl transition-all">
-          <i class="fas fa-forward"></i>
-          <span class="hidden md:inline">Ver siguiente</span>
-        </button>
-
-        <button @click="guardarTrivia"
-          class="flex items-center gap-2 text-sm bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded-xl transition-all">
-          <i class="fas fa-heart"></i>
-          <span class="hidden md:inline">Guardar</span>
-        </button>
       </div>
     </div>
   </div>
@@ -331,6 +361,16 @@ export default {
         { nombre: "Calmado", valor: "calmado", color: "bg-yellow-300 text-yellow-900", icono: "fas fa-smile-beam" },
         { nombre: "Deprimido", valor: "deprimido", color: "bg-indigo-400 text-indigo-900", icono: "fas fa-frown-open" },
       ],
+      incompatibilidades: {
+        feliz: ['triste', 'deprimido', 'enojado'],
+        triste: ['feliz', 'entusiasmado', 'calmado'],
+        enojado: ['feliz', 'calmado', 'entusiasmado'],
+        deprimido: ['feliz', 'entusiasmado', 'neutral'],
+        entusiasmado: ['deprimido', 'triste'],
+        frustrado: ['calmado'],
+        calmado: ['enojado', 'frustrado'],
+        neutral: []
+      },
       diasSemana: [],
       guardandoEstado: false,
       diaSeleccionadoEstados: [],
@@ -761,6 +801,12 @@ export default {
       // Orden alfabético para emparejar la combinación
       const combinacion = estados.sort().join("_");
       return combinaciones[combinacion] || "neutral"; // fallback
+    },
+
+    esIncompatible(estado) {
+      return this.diaSeleccionadoEstados.some(seleccionado =>
+        this.incompatibilidades[seleccionado]?.includes(estado)
+      );
     },
 
     // Anotaciones

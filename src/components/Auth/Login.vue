@@ -1,23 +1,42 @@
 <template>
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl flex flex-col md:flex-row overflow-hidden relative">
+    <div
+        class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl flex flex-col md:flex-row-reverse overflow-hidden relative">
+
         <!-- Loader -->
         <Loader v-if="cargando"
             class="absolute inset-0 z-10 bg-white/80 flex items-center justify-center rounded-2xl" />
 
-        <!-- Columna Izquierda: Formulario -->
+        <!-- Columna Izquierda (Logo y Bienvenida en escritorio / Arriba en mobile) -->
+        <div class="bg-[#146b60]  text-white md:w-1/2 w-full p-10 flex flex-col items-center justify-center space-y-4">
+            <img src="/img/EquinoGrowt.svg" alt="Logo"
+                class="bg-white w-32 h-32 rounded-full border-4 border-white shadow-md transition-transform duration-300 hover:scale-105" />
+            <h3 class="text-2xl md:text-3xl font-bold text-center leading-snug">
+                ¡Hola usuario!<br />
+                Bienvenido de nuevo
+            </h3>
+            <p class="text-sm text-center mt-2">
+                ¿No tenés una cuenta?<br class="md:hidden" />
+                <router-link to="/registro"
+                    class="text-blue-200 hover:text-blue-100 hover:underline transition duration-300 font-semibold">
+                    Registrate acá
+                </router-link>
+            </p>
+        </div>
+
+        <!-- Columna Derecha (Formulario) -->
         <div :class="{ 'opacity-30 pointer-events-none': cargando }"
-            class="md:w-1/2 w-full p-10 transition-opacity duration-300 brand-pattern">
-            <h2 class="text-2xl font-semibold text-[#146b60] mb-6 text-center md:text-left">
+            class="md:w-1/2 w-full brand-pattern p-8 md:p-10 transition-opacity duration-300">
+            <h2 class="text-2xl bg-white font-semibold text-[#146b60] mb-6 text-center md:text-left">
                 Iniciar Sesión
             </h2>
 
-            <form @submit.prevent="login" class="space-y-6 text-left">
+            <form @submit.prevent="login" class="space-y-6">
                 <ErrorMessage v-if="errorMessage" :message="errorMessage" />
 
                 <!-- Correo -->
                 <div class="relative">
                     <input id="email" type="email" v-model="email" placeholder=" " required
-                        class="peer w-full px-4 py-3 border border-gray-300 rounded-lg placeholder-transparent focus:outline-none focus:ring-2 focus:ring-[#146b60] focus:border-transparent" />
+                        class="peer w-full px-4 py-3 border border-gray-300 rounded-lg placeholder-transparent focus:outline-none focus:ring-2 focus:ring-[#146b60]" />
                     <label for="email"
                         class="absolute left-3 top-3 text-gray-500 text-sm bg-white px-2 rounded transition-all duration-200 cursor-text peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:top-[-0.6rem] peer-focus:text-sm peer-focus:text-[#146b60] peer-valid:top-[-0.6rem] peer-valid:text-sm peer-valid:text-[#146b60]">
                         Correo electrónico
@@ -28,13 +47,17 @@
                 <div class="relative">
                     <input id="password" :type="mostrarPassword ? 'text' : 'password'" v-model="password"
                         placeholder=" " required
-                        class="peer w-full px-4 py-3 border border-gray-300 rounded-lg placeholder-transparent focus:outline-none focus:ring-2 focus:ring-[#146b60] focus:border-transparent" />
+                        class="peer w-full px-4 py-3 border border-gray-300 rounded-lg placeholder-transparent focus:outline-none focus:ring-2 focus:ring-[#146b60]" />
                     <label for="password"
                         class="absolute left-3 top-3 text-gray-500 text-sm bg-white px-2 rounded transition-all duration-200 cursor-text peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:top-[-0.6rem] peer-focus:text-sm peer-focus:text-[#146b60] peer-valid:top-[-0.6rem] peer-valid:text-sm peer-valid:text-[#146b60]">
                         Contraseña
                     </label>
-                    <button type="button" @click="toggleMostrarPassword" class="text-sm text-[#146b60] hover:underline">
-                        {{ mostrarPassword ? 'Ocultar' : 'Mostrar' }} contraseña
+
+                    <!-- Botón con ícono FontAwesome -->
+                    <button type="button" @click="toggleMostrarPassword"
+                        class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-[#146b60] transition"
+                        aria-label="Mostrar u ocultar contraseña">
+                        <i :class="mostrarPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
                     </button>
                 </div>
 
@@ -45,23 +68,9 @@
                 </button>
             </form>
         </div>
-
-        <!-- Columna Derecha: Logo y título -->
-        <div class="bg-[#146b60] text-white md:w-1/2 w-full p-10 flex flex-col items-center justify-center">
-            <img src="/img/EquinoGrowt.svg" alt="Logo"
-                class="bg-white w-36 h-36 mb-6 rounded-full border-4 border-white shadow-md transition-transform duration-300 hover:scale-105" />
-            <h3 class="text-3xl font-extrabold text-center leading-tight">
-                ¡Hola usuario!<br>
-                Bienvenido de nuevo
-            </h3>
-            <p class="mt-4 text-center">
-                ¿No tenés una cuenta?<br class="md:hidden">
-                <router-link to="/registro"
-                    class="ml-1 text-blue-500 hover:text-blue-400 transition font-semibold">Regístrate aca</router-link>
-            </p>
-        </div>
     </div>
 </template>
+
 
 <script>
 import Loader from "@/components/Loader.vue";

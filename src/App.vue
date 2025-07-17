@@ -8,12 +8,15 @@
           <img src="/img/EquinoGrowt_logo.svg" alt="EquinoGrowt Logo" class="w-40 h-auto" />
         </router-link>
 
-        <!-- Botón de logout en lugar del menú hamburguesa si está logueado -->
-        <button v-if="isLoggedIn"
-          class="md:hidden bg-red-600 hover:bg-red-700 w-10 h-10 text-white px-3 py-2 rounded-full transition duration-200 flex items-center space-x-2"
-          @click="logout">
-          <i class="fa-solid fa-right-from-bracket text-lg"></i>
-        </button>
+        <!-- Íconos de mobile alineados horizontalmente -->
+        <div v-if="isLoggedIn" class="md:hidden flex items-center space-x-2">
+          <Notificaciones :mostrar="mostrarNoti" @cerrar="mostrarNoti = false" />
+          <button
+            class="bg-red-600 hover:bg-red-700 w-10 h-10 text-white flex items-center justify-center rounded-full transition duration-200"
+            @click="logout" title="Cerrar sesión">
+            <i class="fa-solid fa-right-from-bracket text-lg"></i>
+          </button>
+        </div>
 
         <!-- Menú escritorio -->
         <ul class="hidden md:flex items-center space-x-4 text-base font-medium">
@@ -41,6 +44,7 @@
             <router-link to="/calendario" class="relative inline-block hover:text-[#cfe8e4] transition"
               active-class="text-[#cfe8e4] transition active-link">Calendario</router-link>
           </li>
+          <Notificaciones v-if="isLoggedIn" :mostrar="mostrarNoti" @cerrar="mostrarNoti = false" />
           <li v-if="isLoggedIn">
             <router-link to="/perfil" @click="menuOpen = false"
               class="flex items-center bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-full transition duration-200 space-x-2"
@@ -193,7 +197,8 @@
 <!-- Contenido -->
 <script>
 import { getAuth, signOut } from "firebase/auth";
-import { getFirestore, doc, getDoc } from "firebase/firestore";
+import { getFirestore, doc, getDoc, collection, query, where, getDocs } from "firebase/firestore";
+import Notificaciones from "@/components/Notificaciones.vue";
 
 export default {
   data() {
@@ -203,11 +208,16 @@ export default {
       userEmail: "",
       userRole: "",
       userPhoto: "/img/default-user.jpg",
+      notificaciones: [],
+      cantidadNotis: 0,
+      notisDropdownAbierto: false,
     };
   },
+  components: { Notificaciones },
   watch: {
-    $route(to, from) {
+    $route(to) {
       this.menuOpen = false;
+      this.actualizarFondo();
     },
   },
   methods: {
@@ -217,6 +227,55 @@ export default {
       this.isLoggedIn = false;
       this.$router.push("/login");
     },
+    async obtenerNotificaciones() {
+      const db = getFirestore();
+      const auth = getAuth();
+      const user = auth.currentUser;
+
+      if (!user) return;
+
+      const q = query(
+        collection(db, "notificaciones"),
+        where("usuarioId", "==", user.uid)
+      );
+
+      const snapshot = await getDocs(q);
+
+      this.notificaciones = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+
+      this.cantidadNotis = this.notificaciones.filter(n => !n.leida).length;
+    },
+    toggleDropdown() {
+      this.notisDropdownAbierto = !this.notisDropdownAbierto;
+    },
+    actualizarFondo() {
+      const appDiv = document.getElementById("app");
+      if (!appDiv) return;
+
+      // Limpiar clases anteriores
+      appDiv.classList.remove(
+        'bg-gradient-to-br',
+        'from-[#0d3b2e]',
+        'via-[#146b60]',
+        'to-[#0d3b2e]',
+        'bg-white'
+      );
+
+      // Agregar la clase correspondiente
+      if (this.$route.path === '/login' || this.$route.path === '/registro') {
+        appDiv.classList.add(
+          'bg-gradient-to-br',
+          'from-[#0d3b2e]',
+          'via-[#146b60]',
+          'to-[#0d3b2e]'
+        );
+      } else {
+        appDiv.classList.add('bg-white');
+      }
+    }
   },
   created() {
     const auth = getAuth();
@@ -233,13 +292,19 @@ export default {
           this.userRole = data.tipo;
           this.userPhoto = data.photoURL || this.userPhoto;
         }
+
+        await this.obtenerNotificaciones();
       } else if (this.$route.path !== "/login" && this.$route.path !== "/registro") {
         this.$router.push("/login");
       }
     });
+
+    // Asegura que se aplique el fondo al cargar por primera vez
+    this.actualizarFondo();
   },
 };
 </script>
+
 
 <style scoped>
 html,

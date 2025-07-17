@@ -26,7 +26,8 @@
           <img :src="contacto.foto" class="w-12 h-12 rounded-full object-cover border-2 border-[#146b60]" />
           <div class="flex-1">
             <h3 class="font-semibold text-base">{{ contacto.nombre }}</h3>
-            <p class="text-sm text-gray-500 truncate">{{ contacto.ultimoMensaje ? contacto.ultimoMensaje.slice(0, 7) + '...' : '' }}</p>
+            <p class="text-sm text-gray-500 truncate">{{ contacto.ultimoMensaje ? contacto.ultimoMensaje.slice(0, 7) +
+              '...' : '' }}</p>
           </div>
           <div v-if="contacto.nuevosMensajes" class="bg-[#146b60] text-white text-xs px-2 py-1 rounded-full">
             {{ contacto.nuevosMensajes }}
@@ -345,6 +346,16 @@ async function enviarMensaje() {
     texto: nuevoMensaje.value,
     uid: usuario.value.uid,
     timestamp: serverTimestamp()
+  })
+
+  // Crear notificación para el receptor
+  await addDoc(collection(db, 'notificaciones'), {
+    usuarioId: chatActivo.value.uid,
+    titulo: `Nuevo chat de ${usuario.value.displayName || 'Usuario'}`,
+    mensaje: nuevoMensaje.value.slice(0, 100), // Máximo 100 caracteres
+    tipo: 'nuevo mensaje chat',
+    leida: false,
+    fecha: serverTimestamp()
   })
 
   nuevoMensaje.value = ""
