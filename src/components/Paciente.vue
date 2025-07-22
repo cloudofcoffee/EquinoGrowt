@@ -124,6 +124,129 @@
                 </div>
                 <p v-else class="text-sm text-gray-500">Sin notas todavía.</p>
             </div>
+
+            <!-- ============================= -->
+            <!--  Formulario de exportar informe -->
+            <!-- ============================= -->
+            <div class="mt-6 bg-gray-100 p-4 rounded-xl w-full">
+                <h4 class="font-semibold text-lg text-[#146b60] mb-4">Exportar Informe</h4>
+                <div ref="reportForm" class="space-y-4">
+                    <!-- 1. Periodo -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Desde:</label>
+                            <input type="date" v-model="reportStart"
+                                class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#146b60]" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Hasta:</label>
+                            <input type="date" v-model="reportEnd"
+                                class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#146b60]" />
+                        </div>
+                    </div>
+
+                    <!-- 2. Datos clave -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Nombre y apellido:</label>
+                            <input type="text" v-model="reportData.fullName"
+                                class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#146b60]" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">DNI:</label>
+                            <input type="text" v-model="reportData.dni"
+                                class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#146b60]" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Nacionalidad:</label>
+                            <input type="text" v-model="reportData.nationality"
+                                class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#146b60]" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Inicio de tratamiento:</label>
+                            <input type="date" v-model="reportData.treatmentStart"
+                                class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#146b60]" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Centro de Equinoterapia:</label>
+                            <input type="text" v-model="reportData.center"
+                                class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#146b60]" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Diagnóstico:</label>
+                            <input type="text" v-model="reportData.diagnosis"
+                                class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#146b60]" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Obra social:</label>
+                            <input type="text" v-model="reportData.socialSecurity"
+                                class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#146b60]" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Médico de cabecera:</label>
+                            <input type="text" v-model="reportData.doctor"
+                                class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#146b60]" />
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700">Observaciones:</label>
+                            <textarea v-model="reportData.notes" rows="3"
+                                class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#146b60] resize-y"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botones -->
+                <div class="flex gap-3 mt-4">
+                    <button @click="exportPDF"
+                        class="bg-[#146b60] hover:bg-[#0d4c3f] text-white px-4 py-2 rounded-md shadow-sm transition">
+                        Descargar PDF
+                    </button>
+                    <button @click="sendReport" :disabled="sendingReport"
+                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md shadow-sm transition disabled:opacity-50">
+                        {{ sendingReport ? 'Enviando…' : 'Enviar por mail' }}
+                    </button>
+                </div>
+
+                <!-- VISTA OCULTA SOLO PARA EXPORTAR PDF -->
+                <div ref="reportExport"
+                    class="hidden text-black bg-white p-8 rounded-lg w-full max-w-[800px] mx-auto border border-gray-300">
+                    <!-- Logo y encabezado -->
+                    <div class="flex items-center justify-between mb-6 border-b pb-4">
+                        <img src="/img/EquinoGrowt_logo.png" alt="EquinoGrowt" class="h-12" />
+                        <!-- Cambiá si tu logo tiene otra ruta -->
+                        <div class="text-right">
+                            <h2 class="text-2xl font-bold text-[#146b60]">Informe de Seguimiento</h2>
+                            <p class="text-sm text-gray-600">Desde {{ reportStart }} hasta {{ reportEnd }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Datos del paciente -->
+                    <div class="mb-6 space-y-1 text-sm leading-relaxed">
+                        <p><strong>Nombre y apellido:</strong> {{ reportData.fullName }}</p>
+                        <p><strong>DNI:</strong> {{ reportData.dni }}</p>
+                        <p><strong>Nacionalidad:</strong> {{ reportData.nationality }}</p>
+                        <p><strong>Inicio de tratamiento:</strong> {{ reportData.treatmentStart }}</p>
+                        <p><strong>Centro de Equinoterapia:</strong> {{ reportData.center }}</p>
+                        <p><strong>Diagnóstico:</strong> {{ reportData.diagnosis }}</p>
+                        <p><strong>Obra social:</strong> {{ reportData.socialSecurity }}</p>
+                        <p><strong>Médico de cabecera:</strong> {{ reportData.doctor }}</p>
+                    </div>
+
+                    <!-- Observaciones -->
+                    <div class="bg-gray-50 border border-gray-300 rounded-md p-4">
+                        <h3 class="font-semibold text-[#146b60] text-lg mb-2">Observaciones</h3>
+                        <p class="whitespace-pre-line text-sm text-gray-800">
+                            {{ reportData.notes || 'Sin observaciones adicionales.' }}
+                        </p>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="mt-8 text-right text-xs text-gray-500">
+                        <p>Generado automáticamente por EquinoGrowt</p>
+                        <p>{{ new Date().toLocaleDateString('es-AR') }}</p>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Error -->
@@ -135,7 +258,10 @@
 import { doc, getDoc, collection, addDoc, query, orderBy, getDocs } from "firebase/firestore";
 import { db } from "@/firebase";
 import { getAuth } from "firebase/auth";
-import Loader from "../components/Loader.vue"
+import Loader from "../components/Loader.vue";
+import html2canvas from 'html2canvas';
+import { jsPDF } from "jspdf";
+import axios from 'axios';
 
 export default {
     components: {
@@ -149,6 +275,20 @@ export default {
             notaEditada: '',
             editandoNota: false,
             guardandoNota: false,
+            reportStart: '',      // fecha desde
+            reportEnd: '',        // fecha hasta
+            sendingReport: false, // loader para envío
+            reportData: {
+                fullName: '',
+                dni: '',
+                nationality: '',
+                treatmentStart: '',
+                center: '',
+                diagnosis: '',
+                socialSecurity: '',
+                doctor: '',
+                notes: '',
+            },
         };
     },
     methods: {
@@ -235,9 +375,67 @@ export default {
             } finally {
                 this.guardandoNota = false; // ← loader parcial OFF
             }
-        }
+        },
+        async exportPDF() {
+            if (!this.reportStart || !this.reportEnd || !this.reportData.fullName || !this.reportData.dni) {
+                return alert('Completa todos los campos obligatorios.');
+            }
+
+            const element = this.$refs.reportExport;
+
+            try {
+                // Mostramos temporalmente el contenido oculto para capturarlo
+                element.classList.remove('hidden');
+
+                const canvas = await html2canvas(element, { scale: 2 });
+                const imgData = canvas.toDataURL('image/png');
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const pageWidth = pdf.internal.pageSize.getWidth() - 20;
+                const props = pdf.getImageProperties(imgData);
+                const pageHeight = (props.height * pageWidth) / props.width;
+
+                pdf.addImage(imgData, 'PNG', 10, 10, pageWidth, pageHeight);
+                pdf.save(`informe_${this.reportData.fullName.replace(/ /g, '_')}_${this.reportStart}.pdf`);
+            } catch (err) {
+                console.error(err);
+                alert('Error al generar el PDF.');
+            } finally {
+                // Ocultamos nuevamente la sección
+                element.classList.add('hidden');
+            }
+        },
+
+        async sendReport() {
+            // Validar fechas y datos clave como arriba…
+            if (!this.reportStart || !this.reportEnd || !this.reportData.fullName) {
+                return alert('Completa fechas y nombre del paciente.');
+            }
+            this.sendingReport = true;
+            try {
+                // Armamos un payload con todo junto
+                await axios.post('/api/reports', {
+                    startDate: this.reportStart,
+                    endDate: this.reportEnd,
+                    recipientEmail: this.paciente.email,
+                    recipientType: 'patient',
+                    reportDetails: this.reportData,   // <-- aquí van tus campos
+                });
+                alert('Informe enviado por correo correctamente.');
+            } catch (err) {
+                console.error(err);
+                alert('Error al enviar el informe.');
+            } finally {
+                this.sendingReport = false;
+            }
+        },
     },
     async mounted() {
+        const today = new Date();
+        const lastWeek = new Date(today);
+        lastWeek.setDate(today.getDate() - 7);
+        this.reportStart = lastWeek.toISOString().substr(0, 10);
+        this.reportEnd = today.toISOString().substr(0, 10);
+
         const idPaciente = this.$route.params.id;
         const auth = getAuth();
         const user = auth.currentUser;
