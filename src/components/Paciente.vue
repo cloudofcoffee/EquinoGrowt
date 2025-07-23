@@ -48,7 +48,7 @@
                 <!-- Datos básicos -->
                 <div class="bg-gray-100 p-4 rounded-xl w-full min-w-0">
                     <h4 class="font-semibold text-lg mb-3">Información general</h4>
-                    <p><strong>Nombre y apellido:</strong> {{ paciente.nombre }}</p>
+                    <p><strong>Nombre y apellido:</strong> {{ paciente.nombreCompleto }}</p>
                     <p>
                         <strong class="block sm:inline">Fecha de nacimiento:</strong>
                         <span
@@ -146,49 +146,81 @@
                     </div>
 
                     <!-- 2. Datos clave -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                        <!-- Datos personales -->
+                        <div class="col-span-2">
+                            <h5 class="text-[#146b60] font-semibold mb-2 border-b pb-1">Datos personales</h5>
+                        </div>
+
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Nombre y apellido:</label>
+                            <label class="text-sm font-medium text-gray-700 flex items-center gap-2">
+                                <i class="fas fa-user"></i> Nombre y apellido:
+                            </label>
                             <input type="text" v-model="reportData.fullName"
                                 class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#146b60]" />
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">DNI:</label>
+                            <label class="text-sm font-medium text-gray-700 flex items-center gap-2">
+                                <i class="fas fa-id-card"></i> DNI:
+                            </label>
                             <input type="text" v-model="reportData.dni"
                                 class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#146b60]" />
                         </div>
+
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Nacionalidad:</label>
+                            <label class="text-sm font-medium text-gray-700 flex items-center gap-2">
+                                <i class="fas fa-globe-americas"></i> Nacionalidad:
+                            </label>
                             <input type="text" v-model="reportData.nationality"
                                 class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#146b60]" />
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Inicio de tratamiento:</label>
+                            <label class="text-sm font-medium text-gray-700 flex items-center gap-2">
+                                <i class="fas fa-calendar-day"></i> Inicio de tratamiento:
+                            </label>
                             <input type="date" v-model="reportData.treatmentStart"
                                 class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#146b60]" />
                         </div>
+
+                        <!-- Tratamiento -->
+                        <div class="col-span-2">
+                            <h5 class="text-[#146b60] font-semibold mb-2 border-b pb-1 mt-4">Tratamiento</h5>
+                        </div>
+
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Centro de Equinoterapia:</label>
+                            <label class="text-sm font-medium text-gray-700 flex items-center gap-2">
+                                <i class="fas fa-horse-head"></i> Centro de Equinoterapia:
+                            </label>
                             <input type="text" v-model="reportData.center"
                                 class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#146b60]" />
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Diagnóstico:</label>
+                            <label class="text-sm font-medium text-gray-700 flex items-center gap-2">
+                                <i class="fas fa-notes-medical"></i> Diagnóstico:
+                            </label>
                             <input type="text" v-model="reportData.diagnosis"
                                 class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#146b60]" />
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Obra social:</label>
+                            <label class="text-sm font-medium text-gray-700 flex items-center gap-2">
+                                <i class="fas fa-briefcase-medical"></i> Obra social:
+                            </label>
                             <input type="text" v-model="reportData.socialSecurity"
                                 class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#146b60]" />
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Médico de cabecera:</label>
+                            <label class="text-sm font-medium text-gray-700 flex items-center gap-2">
+                                <i class="fas fa-user-md"></i> Médico de cabecera:
+                            </label>
                             <input type="text" v-model="reportData.doctor"
                                 class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#146b60]" />
                         </div>
+
+                        <!-- Observaciones -->
                         <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700">Observaciones:</label>
+                            <label class="text-sm font-medium text-gray-700 flex items-center gap-2">
+                                <i class="fas fa-comment-dots"></i> Observaciones:
+                            </label>
                             <textarea v-model="reportData.notes" rows="3"
                                 class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#146b60] resize-y"></textarea>
                         </div>
@@ -206,45 +238,52 @@
                         {{ sendingReport ? 'Enviando…' : 'Enviar por mail' }}
                     </button>
                 </div>
+            </div>
 
-                <!-- VISTA OCULTA SOLO PARA EXPORTAR PDF -->
-                <div ref="reportExport"
-                    class="hidden text-black bg-white p-8 rounded-lg w-full max-w-[800px] mx-auto border border-gray-300">
-                    <!-- Logo y encabezado -->
-                    <div class="flex items-center justify-between mb-6 border-b pb-4">
-                        <img src="/img/EquinoGrowt_logo.png" alt="EquinoGrowt" class="h-12" />
-                        <!-- Cambiá si tu logo tiene otra ruta -->
-                        <div class="text-right">
-                            <h2 class="text-2xl font-bold text-[#146b60]">Informe de Seguimiento</h2>
-                            <p class="text-sm text-gray-600">Desde {{ reportStart }} hasta {{ reportEnd }}</p>
-                        </div>
-                    </div>
+            <!-- VISTA OCULTA SOLO PARA EXPORTAR PDF -->
+            <div ref="reportExport"
+                class="hidden text-black bg-white p-10 rounded-xl w-full max-w-[800px] mx-auto border border-gray-300 shadow-md font-sans">
 
-                    <!-- Datos del paciente -->
-                    <div class="mb-6 space-y-1 text-sm leading-relaxed">
-                        <p><strong>Nombre y apellido:</strong> {{ reportData.fullName }}</p>
-                        <p><strong>DNI:</strong> {{ reportData.dni }}</p>
-                        <p><strong>Nacionalidad:</strong> {{ reportData.nationality }}</p>
-                        <p><strong>Inicio de tratamiento:</strong> {{ reportData.treatmentStart }}</p>
-                        <p><strong>Centro de Equinoterapia:</strong> {{ reportData.center }}</p>
-                        <p><strong>Diagnóstico:</strong> {{ reportData.diagnosis }}</p>
-                        <p><strong>Obra social:</strong> {{ reportData.socialSecurity }}</p>
-                        <p><strong>Médico de cabecera:</strong> {{ reportData.doctor }}</p>
+                <!-- Logo y encabezado -->
+                <div class="flex items-center justify-between mb-8 border-b-2 border-[#cdeee2] pb-4">
+                    <img src="/img/EquinoGrowt_logo.png" alt="EquinoGrowt" class="h-14" />
+                    <div class="text-right">
+                        <h2 class="text-3xl font-bold text-[#146b60]">Informe de Seguimiento</h2>
+                        <p class="text-sm text-gray-600 mt-1">Desde {{ reportStart }} hasta {{ reportEnd }}</p>
                     </div>
+                </div>
 
-                    <!-- Observaciones -->
-                    <div class="bg-gray-50 border border-gray-300 rounded-md p-4">
-                        <h3 class="font-semibold text-[#146b60] text-lg mb-2">Observaciones</h3>
-                        <p class="whitespace-pre-line text-sm text-gray-800">
-                            {{ reportData.notes || 'Sin observaciones adicionales.' }}
-                        </p>
+                <!-- Datos del paciente -->
+                <div class="mb-8 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-800">
+                    <div><span class="font-semibold text-[#146b60]">Nombre y apellido:</span> {{ reportData.fullName }}
                     </div>
+                    <div><span class="font-semibold text-[#146b60]">DNI:</span> {{ reportData.dni }}</div>
+                    <div><span class="font-semibold text-[#146b60]">Nacionalidad:</span> {{ reportData.nationality }}
+                    </div>
+                    <div><span class="font-semibold text-[#146b60]">Inicio de tratamiento:</span> {{
+                        reportData.treatmentStart }}</div>
+                    <div class="sm:col-span-2"><span class="font-semibold text-[#146b60]">Centro de
+                            Equinoterapia:</span> {{ reportData.center }}</div>
+                    <div class="sm:col-span-2"><span class="font-semibold text-[#146b60]">Diagnóstico:</span> {{
+                        reportData.diagnosis }}</div>
+                    <div><span class="font-semibold text-[#146b60]">Obra social:</span> {{ reportData.socialSecurity }}
+                    </div>
+                    <div><span class="font-semibold text-[#146b60]">Médico de cabecera:</span> {{ reportData.doctor }}
+                    </div>
+                </div>
 
-                    <!-- Footer -->
-                    <div class="mt-8 text-right text-xs text-gray-500">
-                        <p>Generado automáticamente por EquinoGrowt</p>
-                        <p>{{ new Date().toLocaleDateString('es-AR') }}</p>
-                    </div>
+                <!-- Observaciones -->
+                <div class="bg-[#f8fdfa] border border-[#cdeee2] rounded-lg p-5">
+                    <h3 class="text-lg font-semibold text-[#146b60] mb-2">Observaciones</h3>
+                    <p class="whitespace-pre-line text-gray-700 text-sm leading-relaxed">
+                        {{ reportData.notes || 'Sin observaciones adicionales.' }}
+                    </p>
+                </div>
+
+                <!-- Footer -->
+                <div class="mt-10 text-right text-xs text-gray-500 border-t pt-3">
+                    <p>Generado automáticamente por EquinoGrowt</p>
+                    <p>{{ new Date().toLocaleDateString('es-AR') }}</p>
                 </div>
             </div>
         </div>
@@ -376,6 +415,7 @@ export default {
                 this.guardandoNota = false; // ← loader parcial OFF
             }
         },
+
         async exportPDF() {
             if (!this.reportStart || !this.reportEnd || !this.reportData.fullName || !this.reportData.dni) {
                 return alert('Completa todos los campos obligatorios.');
@@ -473,6 +513,18 @@ export default {
                     ? `Turno asignado el ${this.formatoFecha(turnoAsignado.fecha, false)}`
                     : "Sin turno asignado",
                 foto: pacienteData.photoURL || null,
+            };
+            // Asignar datos completos al paciente para informe
+            this.reportData = {
+                fullName: this.paciente.nombreCompleto || '',
+                dni: this.paciente.dni || '',
+                nationality: this.paciente.nacionalidad || '',
+                treatmentStart: '',
+                center: this.paciente.centro || '',
+                diagnosis: this.paciente.condicionMedica || '',
+                socialSecurity: this.paciente.obraSocial || '',
+                doctor: this.paciente.medicoCabecera || '',
+                notes: '',
             };
             // Cargar las notas del paciente (subcolección)
             const notasRef = collection(db, "notas", idPaciente, "items");

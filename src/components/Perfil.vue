@@ -82,78 +82,57 @@
     </div>
 
     <!-- Información adicional -->
-    <div
-      class="relative mt-10 bg-gradient-to-br from-white via-[#f7faf9] to-[#eafaf5] border border-[#cdeee2] rounded-2xl p-6 shadow-md transition-all duration-300">
-      <!-- Encabezado -->
-      <div class="mb-5">
-        <!-- Contenedor flexible para desktop -->
-        <div class="hidden sm:flex justify-between items-center">
-          <h3 class="text-2xl font-semibold text-[#146b60] flex items-center gap-2">
-            <i class="fa-solid fa-circle-info text-[#0e574e]"></i>
-            Información adicional
-          </h3>
-          <button v-if="!modoEdicion" @click="modoEdicion = true"
-            class="bg-[#146b60] text-white text-sm px-4 py-2 rounded-full hover:bg-[#0e574e] transition flex items-center gap-2 shadow">
-            <i class="fa-solid fa-pen-to-square"></i> Editar
-          </button>
-        </div>
+    <div class="relative mt-5 bg-white border border-teal-200 rounded-2xl p-6 shadow-md space-y-6">
 
-        <!-- Contenido para mobile -->
-        <div class="flex sm:hidden items-center justify-center">
-          <h3 class="text-lg font-semibold text-[#146b60] flex items-center gap-2 whitespace-nowrap">
-            <i class="fa-solid fa-circle-info text-[#0e574e]"></i>
-            Información adicional
-          </h3>
-        </div>
+      <!-- Encabezado -->
+      <div class="flex items-center justify-between">
+        <h3 class="text-2xl font-semibold text-[#146b60] flex items-center gap-2">
+          <i class="fa-solid fa-circle-info text-[#0e574e]"></i>
+          Información adicional
+        </h3>
+        <button v-if="!modoEdicion" @click="modoEdicion = true"
+          class="bg-[#146b60] text-white text-sm px-4 py-2 rounded-full hover:bg-[#0e574e] transition flex items-center gap-2 shadow">
+          <i class="fa-solid fa-pen-to-square"></i> Editar
+        </button>
       </div>
 
-      <!-- Campos -->
-      <div class="space-y-4">
-        <div v-for="(value, key) in infoExtra" :key="key"
-          class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4">
-          <label class="capitalize text-gray-600 font-medium sm:w-44 w-full">
-            {{ key.replace(/([A-Z])/g, ' $1') }}:
+      <!-- Campos visuales en tarjetas -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div v-for="(value, key) in camposFiltrados" :key="key"
+          class="border border-[#cdeee2] rounded-xl p-4 bg-white shadow-sm">
+          <label class="block text-sm text-gray-600 font-semibold capitalize mb-1">
+            {{ key.replace(/([A-Z])/g, ' $1') }}
           </label>
 
-          <!-- Input editable -->
           <transition name="fade-slide" mode="out-in">
-            <div v-if="modoEdicion" class="w-full" :key="key + '-edit'">
-              <input v-model="infoExtra[key]" :type="key === 'fechaNacimiento' ? 'date' : 'text'"
-                class="w-full border border-[#b2e0d3] bg-white rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-[#146b60] focus:outline-none transition shadow-sm" />
+            <div v-if="modoEdicion" :key="key + '-edit'">
+              <input v-model="camposEditables[key]" :type="key === 'fechaNacimiento' ? 'date' : 'text'"
+                class="w-full border border-[#b2e0d3] bg-white rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#146b60] focus:outline-none transition shadow-sm" />
             </div>
-
-            <!-- Texto normal -->
-            <div v-else class="w-full text-gray-800 font-medium text-sm sm:text-base" :key="key + '-show'">
+            <div v-else class="text-gray-800 text-sm font-medium" :key="key + '-show'">
               {{ value || 'No especificado' }}
             </div>
           </transition>
         </div>
       </div>
 
-      <!-- Botones de edición -->
+      <!-- Botones -->
       <transition name="fade-slide">
-        <div v-if="modoEdicion" class="flex flex-col sm:flex-row justify-end gap-3 mt-6">
+        <div v-if="modoEdicion" class="flex justify-end gap-4">
           <button @click="guardarInfoExtra"
-            class="bg-[#146b60] text-white px-5 py-2 rounded-lg hover:bg-[#0e574e] transition shadow flex items-center gap-2 justify-center">
+            class="bg-[#146b60] text-white px-5 py-2 rounded-lg hover:bg-[#0e574e] transition shadow flex items-center gap-2">
             <i class="fa-solid fa-check"></i> Guardar
           </button>
           <button @click="cancelarEdicion"
-            class="bg-red-600 text-white px-5 py-2 rounded-lg hover:bg-red-700 transition shadow flex items-center gap-2 justify-center">
+            class="bg-red-600 text-white px-5 py-2 rounded-lg hover:bg-red-700 transition shadow flex items-center gap-2">
             <i class="fa-solid fa-xmark"></i> Cancelar
           </button>
         </div>
       </transition>
-
-      <!-- Botón editar en esquina inferior derecha del bloque (solo en mobile) -->
-      <button v-if="!modoEdicion" @click="modoEdicion = true"
-        class="sm:hidden absolute bottom-4 right-4 w-11 h-11 bg-[#146b60] text-white rounded-full shadow-lg hover:bg-[#0e574e] transition flex items-center justify-center"
-        title="Editar información">
-        <i class="fa-solid fa-pen-to-square text-base"></i>
-      </button>
     </div>
 
     <!-- Trivias guardadas -->
-    <div v-if="user.datos?.length" class="mt-10 border border-teal-200 bg-white rounded-2xl p-6 shadow-md">
+    <div v-if="user.datos?.length" class="mt-5 border border-teal-200 bg-white rounded-2xl p-6 shadow-md">
       <h3 class="text-xl font-semibold text-[#146b60] mb-4 flex items-center gap-2">
         <i class="fas fa-horse-head"></i> Trivias guardadas
       </h3>
@@ -189,12 +168,17 @@ export default {
       cargando: true,
       fotoSeleccionada: null,
       preview: null,
+      camposEditables: {},
       infoExtra: {
+        nombreCompleto: "",
         dni: "",
         telefono: "",
         direccion: "",
         obraSocial: "",
         fechaNacimiento: "",
+        medicoCabecera: '',
+        nacionalidad: '',
+        centro: '',
       },
       modoEdicion: false,
     };
@@ -215,11 +199,15 @@ export default {
         this.user = data;
         this.nuevoNombre = data.nombre;
         this.infoExtra = {
+          nombreCompleto: data.nombreCompleto || "",
           dni: data.dni || "",
           telefono: data.telefono || "",
           direccion: data.direccion || "",
           obraSocial: data.obraSocial || "",
-          fechaNacimiento: data.fechaNacimiento?.split("T")[0] || "", // Para formato date
+          fechaNacimiento: data.fechaNacimiento?.split("T")[0] || "",
+          medicoCabecera: data.medicoCabecera || "",
+          nacionalidad: data.nacionalidad || "",
+          centro: data.centro || "",
         };
       } else {
         console.error("No se encontró el perfil del usuario.");
@@ -386,11 +374,19 @@ export default {
         const db = getFirestore();
         const uid = auth.currentUser.uid;
 
+        // 🟢 Actualizamos los datos locales
+        this.infoExtra = {
+          ...this.infoExtra,
+          ...this.camposEditables, // Usamos los campos filtrados
+        };
+
+        // 🔄 Subimos la info actualizada a Firestore
         await updateDoc(doc(db, "Tipo_de_usuario", uid), {
           ...this.infoExtra,
         });
 
-        this.modoEdicion = false; // 👈 Esta línea cierra el modo edición
+        this.modoEdicion = false;
+        this.camposEditables = {}; // Limpiar el objeto editable
 
         Swal.fire({
           icon: "success",
@@ -417,14 +413,7 @@ export default {
 
     cancelarEdicion() {
       this.modoEdicion = false;
-      // Restaurar los valores originales desde this.user
-      this.infoExtra = {
-        dni: this.user.dni || "",
-        telefono: this.user.telefono || "",
-        direccion: this.user.direccion || "",
-        obraSocial: this.user.obraSocial || "",
-        fechaNacimiento: this.user.fechaNacimiento?.split("T")[0] || "",
-      };
+      this.camposEditables = {};
     },
 
     async eliminarTrivia(index) {
@@ -472,6 +461,26 @@ export default {
         minute: "2-digit",
       });
     },
+  },
+  watch: {
+    modoEdicion(val) {
+      if (val) {
+        // Cuando entra en edición, copia los campos filtrados a camposEditables
+        if (this.user.tipo === 'paciente') {
+          this.camposEditables = { ...this.infoExtra };
+        } else {
+          const { medicoCabecera, obraSocial, centro, ...resto } = this.infoExtra;
+          this.camposEditables = { ...resto };
+        }
+      }
+    },
+  },
+  computed: {
+    camposFiltrados() {
+      if (this.user.tipo === 'paciente') return this.infoExtra;
+      const { medicoCabecera, obraSocial, centro, ...resto } = this.infoExtra;
+      return resto;
+    }
   },
 };
 </script>
