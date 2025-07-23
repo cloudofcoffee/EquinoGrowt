@@ -57,7 +57,7 @@
 
         <!-- Contenedor de contenido derecho -->
         <div v-if="tipoUsuario === 'doctor' || (turnoSeleccionado && turnoSeleccionado.length > 0)"
-            class="w-full md:w-1/2 space-y-4">
+            class="w-full md:w-1/2 md:mt-0 mt-2 space-y-4">
             <!-- ✅ Formulario de agendado: solo para doctores -->
             <div v-if="tipoUsuario === 'doctor'" class="space-y-4">
                 <h2 class="text-[#146b60] font-semibold text-lg mb-3 flex items-center gap-2">
