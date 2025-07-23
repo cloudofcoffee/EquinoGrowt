@@ -92,7 +92,7 @@
         </h3>
         <button v-if="!modoEdicion" @click="modoEdicion = true"
           class="bg-[#146b60] text-white text-sm px-4 py-2 rounded-full hover:bg-[#0e574e] transition flex items-center gap-2 shadow">
-          <i class="fa-solid fa-pen-to-square"></i> Editar
+          <i class="fa-solid fa-pen-to-square"></i><span class="hidden md:inline">Editar</span> 
         </button>
       </div>
 
