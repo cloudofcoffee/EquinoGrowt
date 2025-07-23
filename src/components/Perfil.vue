@@ -86,13 +86,15 @@
 
       <!-- Encabezado -->
       <div class="flex items-center justify-between">
-        <h3 class="text-2xl font-semibold text-[#146b60] flex items-center gap-2">
+        <h3 class="md:text-2xl font-semibold text-[#146b60] flex items-center gap-2">
           <i class="fa-solid fa-circle-info text-[#0e574e]"></i>
           Información adicional
         </h3>
+        <!-- En escritorio, botón normal -->
         <button v-if="!modoEdicion" @click="modoEdicion = true"
-          class="bg-[#146b60] text-white text-sm px-4 py-2 rounded-full hover:bg-[#0e574e] transition flex items-center gap-2 shadow">
-          <i class="fa-solid fa-pen-to-square"></i><span class="hidden md:inline">Editar</span> 
+          class="hidden md:flex bg-[#146b60] text-white text-sm px-4 py-2 rounded-full hover:bg-[#0e574e] transition items-center gap-2 shadow">
+          <i class="fa-solid fa-pen-to-square"></i>
+          <span>Editar</span>
         </button>
       </div>
 
@@ -118,18 +120,26 @@
 
       <!-- Botones -->
       <transition name="fade-slide">
-        <div v-if="modoEdicion" class="flex justify-end gap-4">
+        <div v-if="modoEdicion" class="flex md:justify-end justify-center gap-4">
           <button @click="guardarInfoExtra"
-            class="bg-[#146b60] text-white px-5 py-2 rounded-lg hover:bg-[#0e574e] transition shadow flex items-center gap-2">
+            class="bg-[#146b60] text-white md:px-5 px-2  py-2 rounded-lg hover:bg-[#0e574e] transition shadow flex items-center gap-2">
             <i class="fa-solid fa-check"></i> Guardar
           </button>
           <button @click="cancelarEdicion"
-            class="bg-red-600 text-white px-5 py-2 rounded-lg hover:bg-red-700 transition shadow flex items-center gap-2">
+            class="bg-red-600 text-white md:px-5 px-2 py-2 rounded-lg hover:bg-red-700 transition shadow flex items-center gap-2">
             <i class="fa-solid fa-xmark"></i> Cancelar
           </button>
         </div>
       </transition>
+
+      <!-- Botón flotante solo en mobile -->
+      <button v-if="!modoEdicion" @click="modoEdicion = true"
+        class="absolute bottom-4 right-4 z-50 bg-[#146b60] text-white w-10 h-10 rounded-full shadow-lg hover:bg-[#0e574e] transition md:hidden">
+        <i class="fa-solid fa-pen-to-square text-lg"></i>
+      </button>
     </div>
+
+
 
     <!-- Trivias guardadas -->
     <div v-if="user.datos?.length" class="mt-5 border border-teal-200 bg-white rounded-2xl p-6 shadow-md">
