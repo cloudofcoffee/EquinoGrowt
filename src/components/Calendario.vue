@@ -1,7 +1,7 @@
 <template>
     <!-- Contenedor general adaptativo -->
     <div
-        class="flex flex-col md:flex-row items-start justify-center gap-10 p-4 md:p-10 max-w-5xl mx-auto bg-white shadow-lg rounded-2xl">
+        class="flex flex-col md:flex-row items-start justify-center gap-1 md:gap-6 p-4 md:p-10 max-w-5xl mx-auto bg-white shadow-lg rounded-2xl">
         <Loader v-if="cargando"
             class="absolute inset-0 z-10 bg-white/80 flex items-center justify-center rounded-2xl" />
 
@@ -57,7 +57,7 @@
 
         <!-- Contenedor de contenido derecho -->
         <div v-if="tipoUsuario === 'doctor' || (turnoSeleccionado && turnoSeleccionado.length > 0)"
-            class="w-full md:w-1/2 mt-6 md:mt-0 space-y-4">
+            class="w-full md:w-1/2 space-y-4">
             <!-- ✅ Formulario de agendado: solo para doctores -->
             <div v-if="tipoUsuario === 'doctor'" class="space-y-4">
                 <h2 class="text-[#146b60] font-semibold text-lg mb-3 flex items-center gap-2">
@@ -116,7 +116,7 @@
 
             <!-- ✅ Vista de turnos del día: para doctor y paciente -->
             <div v-if="turnoSeleccionado && turnoSeleccionado.length > 0"
-                class="relative mt-1 md:mt-6 p-5 rounded-xl shadow-md border bg-white space-y-3">
+                class="relative mt-6 p-5 rounded-xl shadow-md border bg-white space-y-3">
                 <!-- Botón flotante para cerrar -->
                 <button @click="turnoSeleccionado = null"
                     class="absolute top-2 right-2 text-gray-400 hover:text-gray-700 transition">
