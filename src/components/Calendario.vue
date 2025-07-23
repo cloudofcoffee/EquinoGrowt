@@ -116,7 +116,7 @@
 
             <!-- ✅ Vista de turnos del día: para doctor y paciente -->
             <div v-if="turnoSeleccionado && turnoSeleccionado.length > 0"
-                class="relative mt-6 p-5 rounded-xl shadow-md border bg-white space-y-3">
+                class="relative mt-1 md:mt-6 p-5 rounded-xl shadow-md border bg-white space-y-3">
                 <!-- Botón flotante para cerrar -->
                 <button @click="turnoSeleccionado = null"
                     class="absolute top-2 right-2 text-gray-400 hover:text-gray-700 transition">
