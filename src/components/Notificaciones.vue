@@ -22,10 +22,10 @@
             <ul v-else class="max-h-80 overflow-y-auto">
                 <li v-for="noti in notificaciones" :key="noti.id" class="p-4 hover:bg-gray-50 border-b relative">
                     <!-- Botón de eliminar o loader -->
-                    <div class="absolute top-2 right-2">
+                    <div class="absolute top-3 right-3">
                         <Loader v-if="notificacionEnProceso === noti.id" class="w-4 h-4" />
                         <button v-else @click="eliminarNotificacion(noti.id)"
-                            class="text-red-500 hover:text-red-700 text-sm" title="Eliminar notificación">
+                            class="text-white transition bg-red-500 rounded-full p-1 hover:bg-white hover:text-red-700 text-sm w-6 h-6 " title="Eliminar notificación">
                             <i class="fa-solid fa-xmark"></i>
                         </button>
                     </div>

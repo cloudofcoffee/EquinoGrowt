@@ -125,14 +125,15 @@
                 <p v-else class="text-sm text-gray-500">Sin notas todavía.</p>
             </div>
 
-            <!-- ============================= -->
-            <!--  Formulario de exportar informe -->
-            <!-- ============================= -->
+            <!-- ============================== -->
+            <!-- Formulario de exportar informe -->
+            <!-- ============================== -->
             <div class="mt-6 bg-gray-100 p-4 rounded-xl w-full">
                 <h4 class="font-semibold text-lg text-[#146b60] mb-4">Exportar Informe</h4>
-                <div ref="reportForm" class="space-y-4">
+
+                <div ref="reportForm" class="space-y-6">
                     <!-- 1. Periodo -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Desde:</label>
                             <input type="date" v-model="reportStart"
@@ -146,78 +147,79 @@
                     </div>
 
                     <!-- 2. Datos clave -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                    <div class="space-y-6">
                         <!-- Datos personales -->
-                        <div class="col-span-2">
+                        <div>
                             <h5 class="text-[#146b60] font-semibold mb-2 border-b pb-1">Datos personales</h5>
-                        </div>
-
-                        <div>
-                            <label class="text-sm font-medium text-gray-700 flex items-center gap-2">
-                                <i class="fas fa-user"></i> Nombre y apellido:
-                            </label>
-                            <input type="text" v-model="reportData.fullName"
-                                class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#146b60]" />
-                        </div>
-                        <div>
-                            <label class="text-sm font-medium text-gray-700 flex items-center gap-2">
-                                <i class="fas fa-id-card"></i> DNI:
-                            </label>
-                            <input type="text" v-model="reportData.dni"
-                                class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#146b60]" />
-                        </div>
-
-                        <div>
-                            <label class="text-sm font-medium text-gray-700 flex items-center gap-2">
-                                <i class="fas fa-globe-americas"></i> Nacionalidad:
-                            </label>
-                            <input type="text" v-model="reportData.nationality"
-                                class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#146b60]" />
-                        </div>
-                        <div>
-                            <label class="text-sm font-medium text-gray-700 flex items-center gap-2">
-                                <i class="fas fa-calendar-day"></i> Inicio de tratamiento:
-                            </label>
-                            <input type="date" v-model="reportData.treatmentStart"
-                                class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#146b60]" />
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
+                                <div>
+                                    <label class="text-sm font-medium text-gray-700 flex items-center gap-2">
+                                        <i class="fas fa-user"></i> Nombre y apellido:
+                                    </label>
+                                    <input type="text" v-model="reportData.fullName"
+                                        class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#146b60]" />
+                                </div>
+                                <div>
+                                    <label class="text-sm font-medium text-gray-700 flex items-center gap-2">
+                                        <i class="fas fa-id-card"></i> DNI:
+                                    </label>
+                                    <input type="text" v-model="reportData.dni"
+                                        class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#146b60]" />
+                                </div>
+                                <div>
+                                    <label class="text-sm font-medium text-gray-700 flex items-center gap-2">
+                                        <i class="fas fa-globe-americas"></i> Nacionalidad:
+                                    </label>
+                                    <input type="text" v-model="reportData.nationality"
+                                        class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#146b60]" />
+                                </div>
+                                <div>
+                                    <label class="text-sm font-medium text-gray-700 flex items-center gap-2">
+                                        <i class="fas fa-calendar-day"></i> Inicio de tratamiento:
+                                    </label>
+                                    <input type="date" v-model="reportData.treatmentStart"
+                                        class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#146b60]" />
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Tratamiento -->
-                        <div class="col-span-2">
-                            <h5 class="text-[#146b60] font-semibold mb-2 border-b pb-1 mt-4">Tratamiento</h5>
-                        </div>
-
                         <div>
-                            <label class="text-sm font-medium text-gray-700 flex items-center gap-2">
-                                <i class="fas fa-horse-head"></i> Centro de Equinoterapia:
-                            </label>
-                            <input type="text" v-model="reportData.center"
-                                class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#146b60]" />
-                        </div>
-                        <div>
-                            <label class="text-sm font-medium text-gray-700 flex items-center gap-2">
-                                <i class="fas fa-notes-medical"></i> Diagnóstico:
-                            </label>
-                            <input type="text" v-model="reportData.diagnosis"
-                                class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#146b60]" />
-                        </div>
-                        <div>
-                            <label class="text-sm font-medium text-gray-700 flex items-center gap-2">
-                                <i class="fas fa-briefcase-medical"></i> Obra social:
-                            </label>
-                            <input type="text" v-model="reportData.socialSecurity"
-                                class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#146b60]" />
-                        </div>
-                        <div>
-                            <label class="text-sm font-medium text-gray-700 flex items-center gap-2">
-                                <i class="fas fa-user-md"></i> Médico de cabecera:
-                            </label>
-                            <input type="text" v-model="reportData.doctor"
-                                class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#146b60]" />
+                            <h5 class="text-[#146b60] font-semibold mb-2 border-b pb-1">Tratamiento</h5>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
+                                <div>
+                                    <label class="text-sm font-medium text-gray-700 flex items-center gap-2">
+                                        <i class="fas fa-horse-head"></i> Centro de Equinoterapia:
+                                    </label>
+                                    <input type="text" v-model="reportData.center"
+                                        class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#146b60]" />
+                                </div>
+                                <div>
+                                    <label class="text-sm font-medium text-gray-700 flex items-center gap-2">
+                                        <i class="fas fa-notes-medical"></i> Diagnóstico:
+                                    </label>
+                                    <input type="text" v-model="reportData.diagnosis"
+                                        class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#146b60]" />
+                                </div>
+                                <div>
+                                    <label class="text-sm font-medium text-gray-700 flex items-center gap-2">
+                                        <i class="fas fa-briefcase-medical"></i> Obra social:
+                                    </label>
+                                    <input type="text" v-model="reportData.socialSecurity"
+                                        class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#146b60]" />
+                                </div>
+                                <div>
+                                    <label class="text-sm font-medium text-gray-700 flex items-center gap-2">
+                                        <i class="fas fa-user-md"></i> Médico de cabecera:
+                                    </label>
+                                    <input type="text" v-model="reportData.doctor"
+                                        class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#146b60]" />
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Observaciones -->
-                        <div class="md:col-span-2">
+                        <div>
                             <label class="text-sm font-medium text-gray-700 flex items-center gap-2">
                                 <i class="fas fa-comment-dots"></i> Observaciones:
                             </label>
@@ -228,7 +230,7 @@
                 </div>
 
                 <!-- Botones -->
-                <div class="flex gap-3 mt-4">
+                <div class="flex flex-wrap gap-3 mt-6">
                     <button @click="exportPDF"
                         class="bg-[#146b60] hover:bg-[#0d4c3f] text-white px-4 py-2 rounded-md shadow-sm transition">
                         Descargar PDF
@@ -242,7 +244,8 @@
 
             <!-- VISTA OCULTA SOLO PARA EXPORTAR PDF -->
             <div ref="reportExport"
-                class="hidden text-black bg-white p-10 rounded-xl w-full max-w-[800px] mx-auto border border-gray-300 shadow-md font-sans">
+                class="hidden text-black bg-white p-10 rounded-xl border border-gray-300 shadow-md font-sans"
+                style="width: 794px; min-height: 1123px; margin: 0 auto; box-sizing: border-box;">
 
                 <!-- Logo y encabezado -->
                 <div class="flex items-center justify-between mb-8 border-b-2 border-[#cdeee2] pb-4">
@@ -254,7 +257,7 @@
                 </div>
 
                 <!-- Datos del paciente -->
-                <div class="mb-8 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-800">
+                <div class="mb-8 grid grid-cols-2 gap-4 text-sm text-gray-800">
                     <div><span class="font-semibold text-[#146b60]">Nombre y apellido:</span> {{ reportData.fullName }}
                     </div>
                     <div><span class="font-semibold text-[#146b60]">DNI:</span> {{ reportData.dni }}</div>
@@ -262,10 +265,9 @@
                     </div>
                     <div><span class="font-semibold text-[#146b60]">Inicio de tratamiento:</span> {{
                         reportData.treatmentStart }}</div>
-                    <div class="sm:col-span-2"><span class="font-semibold text-[#146b60]">Centro de
-                            Equinoterapia:</span> {{ reportData.center }}</div>
-                    <div class="sm:col-span-2"><span class="font-semibold text-[#146b60]">Diagnóstico:</span> {{
-                        reportData.diagnosis }}</div>
+                    <div><span class="font-semibold text-[#146b60]">Centro de Equinoterapia:</span> {{ reportData.center
+                        }}</div>
+                    <div><span class="font-semibold text-[#146b60]">Diagnóstico:</span> {{ reportData.diagnosis }}</div>
                     <div><span class="font-semibold text-[#146b60]">Obra social:</span> {{ reportData.socialSecurity }}
                     </div>
                     <div><span class="font-semibold text-[#146b60]">Médico de cabecera:</span> {{ reportData.doctor }}

@@ -153,12 +153,50 @@
                 </div>
             </div>
         </div>
+
+        <!-- ✅ Solicitud de turno: solo para pacientes -->
+        <div v-else-if="tipoUsuario === 'paciente'" class="space-y-4">
+            <h2 class="text-[#146b60] font-semibold text-lg mb-3 flex items-center gap-2">
+                <i class="fa-solid fa-envelope"></i>
+                Solicitar turno
+            </h2>
+
+            <!-- Campo: Fecha seleccionada -->
+            <div class="relative">
+                <i
+                    class="fa-solid fa-calendar-day absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
+                <input type="text" :value="fechaSeleccionada || 'Seleccione un día del calendario'" readonly
+                    class="w-full border rounded-lg pl-10 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#146b60] bg-gray-50 text-gray-600 text-sm" />
+            </div>
+
+            <!-- Campo: horario sugerido -->
+            <div class="flex flex-row gap-4">
+                <div class="relative w-full">
+                    <i
+                        class="fa-solid fa-clock absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
+                    <input type="time" v-model="horaInicio"
+                        class="w-full border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#146b60] pl-10 pr-4 py-3 text-sm" />
+                </div>
+                <div class="relative w-full">
+                    <i
+                        class="fa-solid fa-hourglass-end absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
+                    <input type="time" v-model="horaFin"
+                        class="w-full border focus:outline-none focus:ring-2 focus:ring-[#146b60] rounded-lg pl-10 pr-4 py-3 text-sm" />
+                </div>
+            </div>
+
+            <!-- Botón enviar solicitud -->
+            <button @click="enviarSolicitudTurno"
+                class="w-full bg-[#146b60] text-white py-3 rounded-lg hover:bg-[#0f594f] transition text-sm">
+                <i class="fa-solid fa-paper-plane mr-2"></i> Enviar solicitud
+            </button>
+        </div>
     </div>
 </template>
 
 <script>
 import { onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc, deleteDoc, setDoc, getDocs, collection } from "firebase/firestore";
+import { doc, addDoc, getDoc, deleteDoc, setDoc, getDocs, collection, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "@/firebase";
 import Swal from "sweetalert2";
 import Loader from "../components/Loader.vue"
@@ -264,13 +302,104 @@ export default {
                 return;
             }
 
-            const snapshot = await getDocs(collection(db, "Tipo_de_usuario"));
-            this.resultadosPacientes = snapshot.docs
-                .map(doc => ({ uid: doc.id, ...doc.data() }))
-                .filter(user =>
-                    user.tipo === "paciente" &&
-                    user.nombre?.toLowerCase().includes(q)
-                );
+            try {
+                const user = auth.currentUser;
+                if (!user) return;
+
+                // 1. Obtener el documento del doctor
+                const docRef = doc(db, "doctores", user.uid);
+                const docSnap = await getDoc(docRef);
+
+                if (!docSnap.exists()) {
+                    this.resultadosPacientes = [];
+                    return;
+                }
+
+                const data = docSnap.data();
+                const pacientesMap = data.pacientes || {};
+
+                // 2. Obtener los UIDs de los pacientes asignados
+                const uidsAsignados = Object.keys(pacientesMap);
+
+                // 3. Obtener los datos desde Tipo_de_usuario solo si están en esa lista
+                const snapshot = await getDocs(collection(db, "Tipo_de_usuario"));
+
+                this.resultadosPacientes = snapshot.docs
+                    .filter(doc =>
+                        uidsAsignados.includes(doc.id) &&
+                        doc.data().tipo === "paciente" &&
+                        doc.data().nombre?.toLowerCase().includes(q)
+                    )
+                    .map(doc => ({ uid: doc.id, ...doc.data() }));
+
+            } catch (error) {
+                console.error("Error al buscar pacientes asignados:", error);
+                this.resultadosPacientes = [];
+            }
+        },
+
+        async enviarSolicitudTurno() {
+            if (!this.fechaSeleccionada || !this.horaInicio || !this.horaFin) {
+                await swal.fire({
+                    icon: 'warning',
+                    title: 'Campos incompletos',
+                    text: 'Debes seleccionar una fecha y un horario sugerido.',
+                });
+                return;
+            }
+
+            this.cargando = true;
+
+            try {
+                const user = auth.currentUser;
+                const pacienteUid = user.uid;
+
+                // Obtener nombre del paciente desde Tipo_de_usuario
+                const refPaciente = doc(db, "Tipo_de_usuario", pacienteUid);
+                const snap = await getDoc(refPaciente);
+                const data = snap.data();
+
+                const nombrePaciente = data.nombre || "Paciente";
+
+                // Obtener doctor asignado desde doctores
+                const snapshot = await getDocs(collection(db, "doctores"));
+                let doctorUid = null;
+
+                snapshot.forEach(doc => {
+                    const pacientesMap = doc.data().pacientes || {};
+                    if (pacientesMap[pacienteUid]) {
+                        doctorUid = doc.id;
+                    }
+                });
+
+                if (!doctorUid) {
+                    await swal.fire('Sin doctor asignado', 'No tenés un doctor asignado actualmente.', 'info');
+                    return;
+                }
+
+                // Enviar notificación
+                await addDoc(collection(db, 'notificaciones'), {
+                    usuarioId: doctorUid,
+                    titulo: 'Solicitud de turno',
+                    mensaje: `${nombrePaciente} solicita un turno para el ${this.fechaSeleccionada} de ${this.horaInicio} a ${this.horaFin}.`,
+                    tipo: 'solicitud-turno',
+                    leida: false,
+                    fecha: serverTimestamp()
+                });
+
+                await swal.fire('Enviado', 'Tu solicitud fue enviada al doctor.', 'success');
+
+                // Limpiar campos
+                this.fechaSeleccionada = null;
+                this.horaInicio = "";
+                this.horaFin = "";
+
+            } catch (error) {
+                console.error("Error al enviar solicitud:", error);
+                await swal.fire('Error', 'Ocurrió un error al enviar la solicitud.', 'error');
+            } finally {
+                this.cargando = false;
+            }
         },
 
         seleccionarPaciente(paciente) {
@@ -315,6 +444,16 @@ export default {
                 const refTurnoDoctor = doc(db, "doctores", auth.currentUser.uid, "turnos", `${fecha}_${this.pacienteSeleccionado.uid}`);
                 await setDoc(refTurnoDoctor, turno);
 
+                // Crear notificación para el paciente
+                await addDoc(collection(db, 'notificaciones'), {
+                    usuarioId: this.pacienteSeleccionado.uid,
+                    titulo: 'Nuevo turno agendado',
+                    mensaje: `Tenés un turno el día ${turno.fecha} de ${turno.inicio} a ${turno.fin}.`,
+                    tipo: 'turno-agendado',
+                    leida: false,
+                    fecha: serverTimestamp()
+                });
+
                 await swal.fire({
                     icon: 'success',
                     title: 'Turno agendado',
@@ -322,6 +461,7 @@ export default {
                 });
 
                 this.obtenerDiasConTurnos();
+
             } catch (error) {
                 console.error("Error al agendar turno:", error);
                 await swal.fire({

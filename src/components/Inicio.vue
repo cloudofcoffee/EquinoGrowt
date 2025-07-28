@@ -295,9 +295,17 @@
           <p class="text-sm text-gray-500">Seleccioná uno para asignarlo a tu agenda</p>
         </div>
 
+        <!-- Filtros -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <input v-model="filtroNombre" type="text" placeholder="Buscar por nombre"
+            class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#146b60]" />
+          <input v-model="filtroObra" type="text" placeholder="Buscar por obra social"
+            class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#146b60]" />
+        </div>
+
         <!-- Lista de pacientes -->
         <div v-if="pacientesSinDoctor.length" class="space-y-3 max-h-80 overflow-y-auto">
-          <div v-for="p in pacientesSinDoctor" :key="p.id"
+          <div v-for="p in pacientesFiltrados" :key="p.id"
             class="flex items-center justify-between bg-gray-50 rounded-lg p-3 hover:shadow transition">
 
             <!-- Foto + Info -->
@@ -345,11 +353,15 @@ export default {
       turnos: {},
       loading: true,
       nombre: '',
+      centro: '',
+      obraSocial: '',
       foto: '/img/default-user.jpg',
       diaSeleccionado: this.obtenerFechaActual(),
       modalAbierto: false,
       todosLosPacientes: [],
       pacientesSinDoctor: [],
+      filtroNombre: '',
+      filtroObra: '',
       accionando: false,
       estadosAnimicos: [
         { nombre: "Feliz", valor: "feliz", color: "bg-emerald-200 text-emerald-800", icono: "fas fa-smile" },
@@ -479,6 +491,13 @@ export default {
     triviaActual() {
       const trivias = this.tipo === 'paciente' ? this.triviasPaciente : this.triviasProfesional;
       return trivias[this.indiceTrivia];
+    },
+    pacientesFiltrados() {
+      return this.pacientesSinDoctor.filter(p => {
+        const nombreCoincide = p.nombre.toLowerCase().includes(this.filtroNombre.toLowerCase());
+        const obraCoincide = this.filtroObra === '' || (p.obraSocial || '').toLowerCase().includes(this.filtroObra.toLowerCase());
+        return nombreCoincide && obraCoincide;
+      });
     }
   },
   watch: {
@@ -756,7 +775,6 @@ export default {
       this.diaSeleccionadoEstados = diaActual?.estados || [];
     },
 
-
     fusionarEstados(estados) {
       if (!estados || estados.length === 0) return null;
       if (estados.length === 1) return estados[0];
@@ -1029,7 +1047,9 @@ export default {
               id: doc.id,
               nombre: data.nombre,
               edad: data.edad,
+              obraSocial: data.obraSocial,
               condicionMedica: data.condicionMedica,
+              centro: data.centro,
               acompanante: data.acompanante,
               tipo: data.tipo,
               foto: data.photoURL || null,
