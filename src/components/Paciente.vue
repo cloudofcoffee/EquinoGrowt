@@ -233,11 +233,12 @@
                 <div class="flex flex-wrap gap-3 mt-6">
                     <button @click="exportPDF"
                         class="bg-[#146b60] hover:bg-[#0d4c3f] text-white px-4 py-2 rounded-md shadow-sm transition">
-                        Descargar PDF
+                        <i class="fa-solid fa-download md:mr-2"></i><span class="hidden md:inline">Descargar PDF</span>
                     </button>
                     <button @click="sendReport" :disabled="sendingReport"
                         class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md shadow-sm transition disabled:opacity-50">
-                        {{ sendingReport ? 'Enviando…' : 'Enviar por mail' }}
+                        <i class="fa-solid fa-share-from-square md:mr-2"></i>
+                        <span class="hidden md:inline">{{ sendingReport ? 'Enviando…' : 'Enviar por mail' }}</span>
                     </button>
                 </div>
             </div>
@@ -266,7 +267,7 @@
                     <div><span class="font-semibold text-[#146b60]">Inicio de tratamiento:</span> {{
                         reportData.treatmentStart }}</div>
                     <div><span class="font-semibold text-[#146b60]">Centro de Equinoterapia:</span> {{ reportData.center
-                        }}</div>
+                    }}</div>
                     <div><span class="font-semibold text-[#146b60]">Diagnóstico:</span> {{ reportData.diagnosis }}</div>
                     <div><span class="font-semibold text-[#146b60]">Obra social:</span> {{ reportData.socialSecurity }}
                     </div>
@@ -373,16 +374,20 @@ export default {
             return horas <= 24;
         },
 
-        buscarTurnoAsignado(turnos, pacienteId) {
-            for (const [fecha, pacientes] of Object.entries(turnos)) {
-                if (pacientes[pacienteId]) {
-                    return {
-                        fecha,
-                        horario: pacientes[pacienteId].horario,
-                    };
-                }
-            }
-            return null;
+        obtenerProximoTurno(turnos) {
+            const hoy = new Date();
+            const futurosTurnos = Object.values(turnos)
+                .filter(t => {
+                    const fechaTurno = new Date(`${t.fecha}T${t.inicio || '00:00'}`);
+                    return fechaTurno >= hoy;
+                })
+                .sort((a, b) => {
+                    const fechaA = new Date(`${a.fecha}T${a.inicio || '00:00'}`);
+                    const fechaB = new Date(`${b.fecha}T${b.inicio || '00:00'}`);
+                    return fechaA - fechaB;
+                });
+
+            return futurosTurnos[0] || null;
         },
 
         cancelarEdicion() {
@@ -498,24 +503,17 @@ export default {
             // Inicializar campo editable con la nota actual
             this.notaEditada = pacienteData.ultimaNota || '';
 
-            // Obtener los turnos del doctor actual
-            const refDoctor = doc(db, "doctores", user.uid);
-            const snapDoctor = await getDoc(refDoctor);
-
-            let turnoAsignado = null;
-            if (snapDoctor.exists()) {
-                const turnos = snapDoctor.data().turnos || {};
-                turnoAsignado = this.buscarTurnoAsignado(turnos, idPaciente);
-            }
+            const turnoAsignado = this.obtenerProximoTurno(pacienteData.turnos || {});
 
             // Asignar datos completos al paciente
             this.paciente = {
                 ...pacienteData,
                 turnoTexto: turnoAsignado
-                    ? `Turno asignado el ${this.formatoFecha(turnoAsignado.fecha, false)}`
-                    : "Sin turno asignado",
+                    ? `Próximo turno: ${this.formatoFecha(turnoAsignado.fecha, false)} de ${turnoAsignado.inicio} a ${turnoAsignado.fin}`
+                    : "Sin turnos próximos",
                 foto: pacienteData.photoURL || null,
             };
+
             // Asignar datos completos al paciente para informe
             this.reportData = {
                 fullName: this.paciente.nombreCompleto || '',

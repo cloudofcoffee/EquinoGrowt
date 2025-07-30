@@ -1,12 +1,10 @@
 <template>
-    <!-- Contenedor general adaptativo -->
     <div
-        class="flex flex-col md:flex-row items-start justify-center gap-1 md:gap-6 p-4 md:p-10 max-w-5xl mx-auto bg-white shadow-lg rounded-2xl">
+        class="flex flex-col md:flex-row items-start justify-center gap-3 p-4 md:p-10 max-w-6xl mx-auto bg-white shadow-lg rounded-2xl relative">
         <Loader v-if="cargando"
             class="absolute inset-0 z-10 bg-white/80 flex items-center justify-center rounded-2xl" />
-
-        <!-- Vista móvil - solo calendario con barrita inferior -->
-        <div class="flex flex-col items-center justify-center p-4 pt-6 max-w-sm mx-auto bg-white shadow rounded-2xl">
+        <div
+            class="flex flex-col items-center justify-center w-full md:w-1/2 p-4 bg-white rounded-2xl shadow-md space-y-6">
 
             <!-- Encabezado -->
             <div class="flex items-center justify-between w-full mb-4">
@@ -39,11 +37,9 @@
                     }" @click="seleccionarDia(dia)">
                     {{ dia }}
 
-                    <!-- Marquita de turno -->
                     <div v-if="getPacienteDelDia(dia)" class="absolute bottom-1 w-1.5 h-1.5 rounded-full bg-[#146b60]">
                     </div>
 
-                    <!-- Tooltip estilizado mejorado -->
                     <div v-if="getPacienteDelDia(dia)"
                         class="absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap bg-[#146b60] text-white text-xs px-2 py-1 rounded shadow opacity-0 group-hover:opacity-100 transition-opacity z-40 pointer-events-none">
                         {{ getPacienteDelDia(dia) }}
@@ -51,29 +47,23 @@
                 </div>
             </div>
 
-            <!-- Barrita de sección -->
             <div class="w-16 h-1.5 bg-gray-300 rounded-full mb-2"></div>
         </div>
 
-        <!-- Contenedor de contenido derecho -->
-        <div v-if="tipoUsuario === 'doctor' || (turnoSeleccionado && turnoSeleccionado.length > 0)"
-            class="w-full md:w-1/2 md:mt-0 mt-2 space-y-4">
-            <!-- ✅ Formulario de agendado: solo para doctores -->
-            <div v-if="tipoUsuario === 'doctor'" class="space-y-4">
+        <div class="w-full md:w-1/2 flex flex-col space-y-2 mt-4 md:mt-0">
+            <div v-if="tipoUsuario === 'doctor'" class="space-y-4 rounded-2xl shadow-md p-3">
                 <h2 class="text-[#146b60] font-semibold text-lg mb-3 flex items-center gap-2">
                     <i class="fa-solid fa-calendar-day"></i>
                     Agenda
                 </h2>
 
-                <!-- Campo: Nombre del paciente -->
-                <div class="relative">
-                    <i
-                        class="fa-solid fa-user absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
+                <!-- Input: Nombre del paciente -->
+                <div class="relative w-full max-w-md">
+                    <i class="fa-solid fa-user absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
                     <input type="text" v-model="nombrePaciente" @input="buscarPacientes"
                         placeholder="Nombre del paciente"
-                        class="w-full border rounded-lg pl-10 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#146b60] text-sm" />
-
-                    <!-- Resultados del autocomplete -->
+                        class="w-full border rounded-lg pl-10 pr-4 py-2.5 md:py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#146b60] transition" />
+                    <!-- Autocomplete -->
                     <ul v-if="resultadosPacientes.length"
                         class="absolute z-10 w-full bg-white border rounded mt-1 shadow-md max-h-40 overflow-y-auto text-sm">
                         <li v-for="paciente in resultadosPacientes" :key="paciente.uid"
@@ -83,15 +73,14 @@
                     </ul>
                 </div>
 
-                <!-- Campo: Fecha seleccionada -->
-                <div class="relative">
+                <!-- Input: Fecha seleccionada -->
+                <div class="relative w-full max-w-md">
                     <i
-                        class="fa-solid fa-calendar-day absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
+                        class="fa-solid fa-calendar-day absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
                     <input type="text" :value="fechaSeleccionada || 'Seleccione un día del calendario'" readonly
-                        class="w-full border rounded-lg pl-10 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#146b60] bg-gray-50 text-gray-600 text-sm" />
+                        class="w-full border rounded-lg pl-10 pr-4 py-2.5 md:py-3 bg-gray-50 text-gray-600 text-sm focus:outline-none focus:ring-2 focus:ring-[#146b60] transition" />
                 </div>
 
-                <!-- Horarios -->
                 <div class="flex flex-row gap-4">
                     <div class="relative w-full">
                         <i
@@ -107,36 +96,62 @@
                     </div>
                 </div>
 
-                <!-- Botón agendar -->
                 <button @click="agendarTurno"
                     class="w-full bg-[#146b60] text-white py-3 rounded-lg hover:bg-[#0f594f] transition text-sm">
                     <i class="fa-solid fa-calendar-plus mr-2"></i> Agendar
                 </button>
             </div>
 
-            <!-- ✅ Vista de turnos del día: para doctor y paciente -->
-            <div v-if="turnoSeleccionado && turnoSeleccionado.length > 0"
-                class="relative mt-6 p-5 rounded-xl shadow-md border bg-white space-y-3">
-                <!-- Botón flotante para cerrar -->
+            <!-- ✅ Solicitud de turno: solo para pacientes -->
+            <div v-else-if="tipoUsuario === 'paciente'" class="space-y-4 rounded-2xl shadow-md p-3">
+                <h2 class="text-[#146b60] font-semibold text-lg mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-envelope"></i>
+                    Solicitar turno
+                </h2>
+
+                <div class="relative">
+                    <i
+                        class="fa-solid fa-calendar-day absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
+                    <input type="text" :value="fechaSeleccionada || 'Seleccione un día del calendario'" readonly
+                        class="w-full border rounded-lg pl-10 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#146b60] bg-gray-50 text-gray-600 text-sm" />
+                </div>
+
+                <div class="flex flex-row gap-4">
+                    <div class="relative w-full">
+                        <i
+                            class="fa-solid fa-clock absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
+                        <input type="time" v-model="horaInicio"
+                            class="w-full border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#146b60] pl-10 pr-4 py-3 text-sm" />
+                    </div>
+                    <div class="relative w-full">
+                        <i
+                            class="fa-solid fa-hourglass-end absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
+                        <input type="time" v-model="horaFin"
+                            class="w-full border focus:outline-none focus:ring-2 focus:ring-[#146b60] rounded-lg pl-10 pr-4 py-3 text-sm" />
+                    </div>
+                </div>
+
+                <button @click="enviarSolicitudTurno"
+                    class="w-full bg-[#146b60] text-white py-3 rounded-lg hover:bg-[#0f594f] transition text-sm">
+                    <i class="fa-solid fa-paper-plane mr-2"></i> Enviar solicitud
+                </button>
+            </div>
+
+            <!-- ✅ Turnos del día -->
+            <div v-if="turnoSeleccionado && turnoSeleccionado.length > 0" class="relative rounded-2xl shadow-md p-3">
                 <button @click="turnoSeleccionado = null"
-                    class="absolute top-2 right-2 text-gray-400 hover:text-gray-700 transition">
+                    class="absolute top-2 right-0 text-white bg-red-500 hover:bg-white rounded-full w-7 h-7 p-1 hover:text-red-500 transition">
                     <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
-
-                <h3 class="text-lg font-bold text-[#146b60] flex items-center gap-2 mb-4">
+                <h3 class="text-lg font-bold text-[#146b60] flex items-center gap-2 mb-2">
                     <i class="fa-solid fa-calendar-check"></i> Turnos del {{ fechaSeleccionada }}
                 </h3>
-
-                <!-- Lista de turnos -->
                 <div v-for="(turno, index) in turnoSeleccionado" :key="index"
                     class="relative text-sm text-gray-700 space-y-1 border border-gray-200 rounded-lg p-4 mb-2">
-                    <!-- Botón para eliminar turno (solo doctor) -->
                     <button v-if="tipoUsuario === 'doctor'" @click="eliminarTurnoIndividual(turno)"
                         class="absolute top-2 right-2 text-red-500 hover:text-red-700 transition text-xs">
                         <i class="fa-solid fa-trash"></i>
                     </button>
-
-                    <!-- Info según el tipo de usuario -->
                     <p v-if="tipoUsuario === 'doctor'">
                         <i class="fa-solid fa-user text-[#146b60] mr-1"></i>
                         <strong>Paciente:</strong> {{ turno.paciente }}
@@ -145,51 +160,12 @@
                         <i class="fa-solid fa-user-doctor text-[#146b60] mr-1"></i>
                         <strong>Doctor:</strong> {{ turno.doctor }}
                     </p>
-
                     <p>
                         <i class="fa-solid fa-clock text-[#146b60] mr-1"></i>
                         <strong>Horario:</strong> {{ formatHora(turno.inicio) }} - {{ formatHora(turno.fin) }}
                     </p>
                 </div>
             </div>
-        </div>
-
-        <!-- ✅ Solicitud de turno: solo para pacientes -->
-        <div v-else-if="tipoUsuario === 'paciente'" class="space-y-4">
-            <h2 class="text-[#146b60] font-semibold text-lg mb-3 flex items-center gap-2">
-                <i class="fa-solid fa-envelope"></i>
-                Solicitar turno
-            </h2>
-
-            <!-- Campo: Fecha seleccionada -->
-            <div class="relative">
-                <i
-                    class="fa-solid fa-calendar-day absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
-                <input type="text" :value="fechaSeleccionada || 'Seleccione un día del calendario'" readonly
-                    class="w-full border rounded-lg pl-10 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#146b60] bg-gray-50 text-gray-600 text-sm" />
-            </div>
-
-            <!-- Campo: horario sugerido -->
-            <div class="flex flex-row gap-4">
-                <div class="relative w-full">
-                    <i
-                        class="fa-solid fa-clock absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
-                    <input type="time" v-model="horaInicio"
-                        class="w-full border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#146b60] pl-10 pr-4 py-3 text-sm" />
-                </div>
-                <div class="relative w-full">
-                    <i
-                        class="fa-solid fa-hourglass-end absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
-                    <input type="time" v-model="horaFin"
-                        class="w-full border focus:outline-none focus:ring-2 focus:ring-[#146b60] rounded-lg pl-10 pr-4 py-3 text-sm" />
-                </div>
-            </div>
-
-            <!-- Botón enviar solicitud -->
-            <button @click="enviarSolicitudTurno"
-                class="w-full bg-[#146b60] text-white py-3 rounded-lg hover:bg-[#0f594f] transition text-sm">
-                <i class="fa-solid fa-paper-plane mr-2"></i> Enviar solicitud
-            </button>
         </div>
     </div>
 </template>
@@ -202,10 +178,6 @@ import Swal from "sweetalert2";
 import Loader from "../components/Loader.vue"
 
 const swal = Swal.mixin({
-    customClass: {
-        confirmButton: 'bg-[#146b60] text-white px-4 py-2 rounded hover:bg-[#0f594f]',
-        cancelButton: 'bg-gray-200 text-gray-800 px-4 py-2 rounded'
-    },
     buttonsStyling: false
 });
 
@@ -344,6 +316,9 @@ export default {
                     icon: 'warning',
                     title: 'Campos incompletos',
                     text: 'Debes seleccionar una fecha y un horario sugerido.',
+                    timerProgressBar: true,
+                    timer: 10000,
+                    showConfirmButton: false
                 });
                 return;
             }
@@ -387,7 +362,14 @@ export default {
                     fecha: serverTimestamp()
                 });
 
-                await swal.fire('Enviado', 'Tu solicitud fue enviada al doctor.', 'success');
+                await swal.fire({
+                    icon: 'success',
+                    title: 'Enviado',
+                    text: `Tu solicitud fue enviada al doctor`,
+                    timerProgressBar: true,
+                    timer: 2500,
+                    showConfirmButton: false
+                });
 
                 // Limpiar campos
                 this.fechaSeleccionada = null;
@@ -416,6 +398,9 @@ export default {
                         icon: 'warning',
                         title: 'Completa los campos',
                         text: `Debes completar todos los campos para poder agendar un turno`,
+                        timerProgressBar: true,
+                        timer: 2500,
+                        showConfirmButton: false
                     });
                     return;
                 }
@@ -458,6 +443,9 @@ export default {
                     icon: 'success',
                     title: 'Turno agendado',
                     text: `Turno para ${this.pacienteSeleccionado.nombre} el día ${turno.fecha}`,
+                    timerProgressBar: true,
+                    timer: 2500,
+                    showConfirmButton: false
                 });
 
                 this.obtenerDiasConTurnos();
@@ -468,6 +456,9 @@ export default {
                     icon: 'error',
                     title: 'Error',
                     text: 'Ocurrió un error al agendar el turno.',
+                    timerProgressBar: true,
+                    timer: 2500,
+                    showConfirmButton: false
                 });
             } finally {
                 this.cargando = false;
@@ -523,7 +514,6 @@ export default {
                                 fecha.getMonth() === this.fechaActual.getMonth() &&
                                 fecha.getFullYear() === this.fechaActual.getFullYear()
                             ) {
-                                // 🔍 Obtener nombre del doctor
                                 let nombreDoctor = "";
                                 try {
                                     const docRef = doc(db, "Tipo_de_usuario", turno.doctorUid);
@@ -566,6 +556,13 @@ export default {
                 showCancelButton: true,
                 confirmButtonText: 'Sí, eliminar',
                 cancelButtonText: 'Cancelar',
+                buttonsStyling: false,
+                customClass: {
+                    confirmButton: 'bg-[#146b60] hover:bg-[#0e574e] text-white px-4 py-2 rounded-md ml-2',
+                    cancelButton: 'bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md',
+                    actions: 'flex justify-end gap-4 mt-4',
+                    popup: 'rounded-xl p-6',
+                }
             });
 
             if (!confirm.isConfirmed) return;
@@ -573,11 +570,9 @@ export default {
             this.cargando = true;
 
             try {
-                // 🔥 Eliminar el documento del turno del doctor completamente
                 const refDoctor = doc(db, "doctores", auth.currentUser.uid, "turnos", `${fecha}_${pacienteUid}`);
-                await deleteDoc(refDoctor); // ✅ Eliminación total
+                await deleteDoc(refDoctor);
 
-                // 🔥 Eliminar el turno del array en el documento del paciente
                 const refPaciente = doc(db, "Tipo_de_usuario", pacienteUid);
                 const docSnap = await getDoc(refPaciente);
 
@@ -591,7 +586,14 @@ export default {
 
                 // ✅ Actualizar la interfaz
                 this.turnoSeleccionado = this.turnoSeleccionado.filter(t => t.pacienteUid !== pacienteUid);
-                await swal.fire('Eliminado', 'El turno fue eliminado.', 'success');
+                await swal.fire({
+                    icon: 'success',
+                    title: 'Turno eliminado',
+                    text: `El turno fue eliminado`,
+                    timerProgressBar: true,
+                    timer: 2500,
+                    showConfirmButton: false
+                });
 
                 // Cerrar panel si no quedan turnos
                 if (this.turnoSeleccionado.length === 0) {
@@ -604,7 +606,14 @@ export default {
 
             } catch (error) {
                 console.error(error);
-                await swal.fire('Error', 'No se pudo eliminar el turno.', 'error');
+                await swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: `No se pudo eliminar el turno.`,
+                    timerProgressBar: true,
+                    timer: 2500,
+                    showConfirmButton: false
+                });
             } finally {
                 this.cargando = false;
             }

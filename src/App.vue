@@ -40,7 +40,7 @@
             <router-link to="/chat" class="relative inline-block hover:text-[#cfe8e4] transition"
               active-class="text-[#cfe8e4] transition active-link">Chat</router-link>
           </li>
-          <li v-if="isLoggedIn">
+          <li v-if="isLoggedIn && userRole != 'admin'">
             <router-link to="/calendario" class="relative inline-block hover:text-[#cfe8e4] transition"
               active-class="text-[#cfe8e4] transition active-link">Calendario</router-link>
           </li>
@@ -95,7 +95,7 @@
             <li v-if="!isLoggedIn"><router-link to="/registro" class="hover:underline">Registro</router-link></li>
             <li v-if="isLoggedIn"><router-link to="/" class="hover:underline">Inicio</router-link></li>
             <li v-if="isLoggedIn"><router-link to="/chat" class="hover:underline">Chat</router-link></li>
-            <li v-if="isLoggedIn"><router-link to="/perfil" class="hover:underline">Perfil</router-link></li>
+            <li v-if="isLoggedIn && userRole !='admin'"><router-link to="/calendario" class="hover:underline">Calendario</router-link></li>
           </ul>
         </div>
 
@@ -174,7 +174,7 @@
         </router-link>
 
         <!-- Calendario -->
-        <router-link v-if="isLoggedIn" to="/calendario" class="flex flex-col items-center transition-all duration-200"
+        <router-link v-if="isLoggedIn && userRole != 'admin'" to="/calendario" class="flex flex-col items-center transition-all duration-200"
           :class="{ 'text-white': $route.path !== '/calendario', 'text-teal-200': $route.path === '/calendario' }">
           <i class="fa-solid fa-calendar-days text-2xl mb-1"></i>
           <span class="text-xs font-medium">Calendario</span>

@@ -39,7 +39,7 @@
                         class="peer w-full px-4 py-3 border border-gray-300 rounded-lg placeholder-transparent focus:outline-none focus:ring-2 focus:ring-[#146b60]" />
                     <label for="name"
                         class="absolute left-3 top-3 text-gray-500 text-sm bg-white px-2 rounded transition-all duration-200 cursor-text peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:top-[-0.6rem] peer-focus:text-sm peer-focus:text-[#146b60] peer-valid:top-[-0.6rem] peer-valid:text-sm peer-valid:text-[#146b60]">
-                        Nombre completo
+                        Nombre
                     </label>
                 </div>
 

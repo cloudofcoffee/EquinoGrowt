@@ -49,7 +49,8 @@
             'bg-blue-100 text-blue-800': user.tipo === 'paciente',
             'bg-teal-100 text-teal-800': user.tipo === 'doctor',
             'bg-purple-100 text-purple-800': user.tipo === 'admin',
-            'bg-yellow-100 text-yellow-800': user.tipo === 'pendiente'
+            'bg-yellow-100 text-yellow-800': user.tipo === 'pendiente',
+            'bg-red-100 text-red-800': user.tipo === 'rechazado'
           }">
             {{ user.tipo === 'pendiente' ? 'Doctor (pendiente)' : user.tipo }}
           </span>

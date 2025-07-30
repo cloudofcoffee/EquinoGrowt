@@ -44,7 +44,7 @@
       <!-- Lista de Pacientes -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div v-for="paciente in pacientesDelDia" :key="paciente.id"
-          class="relative bg-white border border-gray-200 rounded-xl p-4 flex items-start gap-4 shadow hover:border-[#146b60] hover:shadow-lg transition cursor-pointer"
+          class="relative bg-white border-2 border-gray-200 rounded-xl p-4 flex items-start gap-4 shadow hover:border-teal-200 hover:shadow-lg transition cursor-pointer"
           @click="$router.push({ name: 'Paciente', params: { id: paciente.id } })">
           <!-- Imagen -->
           <img :src="paciente.foto || '/img/default-user.jpg'"
@@ -105,8 +105,13 @@
       </div>
     </div>
 
+    <!-- Vista Admin -->
+    <div v-else-if="tipo === 'admin'" class="px-4 sm:px-6 lg:px-8 py-6 max-w-7xl mx-auto">
+      <Admin />
+    </div>
+
     <!-- Vista Paciente -->
-    <div v-else-if="tipo === 'paciente'">
+    <div v-else>
       <Loader v-if="accionando"
         class="absolute inset-0 z-20 bg-white/80 flex items-center justify-center rounded-2xl" />
 
@@ -263,14 +268,6 @@
         </div>
       </div>
     </div>
-
-    <!-- Vista Admin -->
-    <div v-else>
-      <div class="w-full h-full flex justify-center items-center bg-white">
-        <img src="/img/estamos-trabajando.png" alt="Estamos trabajando en ello"
-          class="w-full rounded-lg max-w-xl object-cover shadow" />
-      </div>
-    </div>
   </div>
 
   <!-- Modal Agregar Paciente -->
@@ -327,7 +324,7 @@
         </div>
 
         <!-- Sin pacientes -->
-        <div v-else class="text-center text-gray-500 py-6">
+        <div v-else class="px-6 py-8 max-w-6xl mx-auto">
           No hay pacientes disponibles
         </div>
       </div>
@@ -340,11 +337,13 @@
 import { getAuth } from 'firebase/auth';
 import { getFirestore, doc, getDoc, setDoc, collection, getDocs, deleteField, updateDoc } from 'firebase/firestore';
 import Loader from "../components/Loader.vue"
+import Admin from "../components/DashboardAdmin.vue"
 import Swal from 'sweetalert2';
 
 export default {
   components: {
     Loader,
+    Admin
   },
   data() {
     return {
