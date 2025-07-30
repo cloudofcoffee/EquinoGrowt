@@ -5,11 +5,12 @@ import { getAuth } from "firebase/auth";
 import { getStorage } from "firebase/storage";
 
 // 🔵 Firebase principal
+// Firebase principal
 const mainConfig = {
   apiKey: "AIzaSyAvqhSfkcaRHaZzIJIX-v2l82OB4kDiIwY",
   authDomain: "equinogrowt.firebaseapp.com",
   projectId: "equinogrowt",
-  storageBucket: "equinogrowt.firebasestorage.app",
+  storageBucket: "equinogrowt.appspot.com", // ← corregido
   messagingSenderId: "549785640053",
   appId: "1:549785640053:web:e0128b97826b5fa7bfac3c",
   measurementId: "G-ZZGWVPX5EZ"

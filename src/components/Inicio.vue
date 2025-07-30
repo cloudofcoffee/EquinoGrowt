@@ -290,14 +290,23 @@
         <div class="text-center">
           <h3 class="text-xl font-bold text-[#146b60]">Pacientes sin doctor asignado</h3>
           <p class="text-sm text-gray-500">Seleccioná uno para asignarlo a tu agenda</p>
+
+          <!-- Botón para mostrar/ocultar filtros -->
+          <button @click="mostrarFiltros = !mostrarFiltros"
+            class="mt-4 inline-flex items-center gap-2 text-sm text-[#146b60] bg-[#146b60]/10 px-4 py-2 rounded-full w-full hover:bg-[#146b60]/20 transition">
+            <i :class="mostrarFiltros ? 'fa-solid fa-chevron-up' : 'fa-solid fa-chevron-down'"></i>
+            {{ mostrarFiltros ? 'Ocultar filtros' : 'Mostrar filtros' }}
+          </button>
         </div>
 
-        <!-- Filtros -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <!-- Filtros (ocultables) -->
+        <div v-if="mostrarFiltros" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <input v-model="filtroNombre" type="text" placeholder="Buscar por nombre"
             class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#146b60]" />
           <input v-model="filtroObra" type="text" placeholder="Buscar por obra social"
             class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#146b60]" />
+          <input v-model="filtroCentro" type="text" placeholder="Buscar por centro médico"
+            class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#146b60] sm:col-span-2" />
         </div>
 
         <!-- Lista de pacientes -->
@@ -361,7 +370,9 @@ export default {
       pacientesSinDoctor: [],
       filtroNombre: '',
       filtroObra: '',
+      filtroCentro: '',
       accionando: false,
+      mostrarFiltros: false,
       estadosAnimicos: [
         { nombre: "Feliz", valor: "feliz", color: "bg-emerald-200 text-emerald-800", icono: "fas fa-smile" },
         { nombre: "Neutral", valor: "neutral", color: "bg-yellow-200 text-yellow-800", icono: "fas fa-meh" },
@@ -495,7 +506,8 @@ export default {
       return this.pacientesSinDoctor.filter(p => {
         const nombreCoincide = p.nombre.toLowerCase().includes(this.filtroNombre.toLowerCase());
         const obraCoincide = this.filtroObra === '' || (p.obraSocial || '').toLowerCase().includes(this.filtroObra.toLowerCase());
-        return nombreCoincide && obraCoincide;
+        const centroCoincide = this.filtroCentro === '' || (p.centro || '').toLowerCase().includes(this.filtroCentro.toLowerCase());
+        return nombreCoincide && obraCoincide && centroCoincide;
       });
     }
   },
@@ -527,10 +539,25 @@ export default {
       return dia;
     },
 
-    abrirModal() {
-      const idsAsignados = new Set(this.pacientes.map(p => p.id));
-      this.pacientesSinDoctor = this.todosLosPacientes
-        .filter(p => p.tipo === 'paciente' && !idsAsignados.has(p.id));
+    async abrirModal() {
+      const db = getFirestore();
+      const doctoresRef = collection(db, "doctores");
+      const doctoresSnap = await getDocs(doctoresRef);
+
+      // Recolectar todos los IDs de pacientes asignados a cualquier doctor
+      const idsAsignadosGlobal = new Set();
+
+      doctoresSnap.forEach(doc => {
+        const data = doc.data();
+        const pacientes = data.pacientes || {};
+        Object.keys(pacientes).forEach(id => idsAsignadosGlobal.add(id));
+      });
+
+      // Filtrar pacientes que no están asignados a ningún doctor
+      this.pacientesSinDoctor = this.todosLosPacientes.filter(p => {
+        return p.tipo === 'paciente' && !idsAsignadosGlobal.has(p.id);
+      });
+
       this.modalAbierto = true;
     },
 

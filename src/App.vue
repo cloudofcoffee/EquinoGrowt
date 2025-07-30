@@ -2,10 +2,10 @@
   <div class="flex flex-col min-h-screen">
     <!-- Navbar -->
     <nav :class="['text-white shadow-md', userRole === 'admin' ? 'bg-[#0d0d0d]' : 'bg-teal-950']">
-      <div class="container mx-auto flex items-center justify-between px-4 py-3">
+      <div class="container mx-auto flex items-center justify-between px-4">
         <!-- Logo -->
         <router-link to="/" class="flex items-center space-x-2">
-          <img src="/img/EquinoGrowt_logo.svg" alt="EquinoGrowt Logo" class="w-40 h-auto" />
+          <img src="/img/EquinoGrowt_logo.svg" alt="EquinoGrowt Logo" class="w-32 h-auto" />
         </router-link>
 
         <!-- Íconos de mobile alineados horizontalmente -->
@@ -66,12 +66,12 @@
     </nav>
 
     <!-- Contenido -->
-    <main class="flex items-center justify-center container mx-auto px-4 py-6">
+    <main class="flex items-center justify-center container mx-auto px-4 py-1">
       <router-view />
     </main>
 
     <!-- Footer -->
-    <footer class="hidden lg:block bg-[#0e0e0e] text-gray-200 pt-10 border-t">
+    <footer class="hidden lg:block bg-[#0e0e0e] text-gray-200 pt-10">
       <div class="max-w-7xl mx-auto px-6 md:px-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
 
         <!-- Logo y descripción -->

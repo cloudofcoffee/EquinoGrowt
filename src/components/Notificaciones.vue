@@ -2,7 +2,7 @@
     <div class="relative">
         <!-- Ícono campana -->
         <button @click="toggleDropdown"
-            class="relative bg-teal-600 hover:bg-teal-700 text-white w-9 h-9 rounded-full transition duration-200 flex items-center justify-center"
+            class="relative bg-teal-600 hover:bg-teal-700 text-white md:h-9 w-10 md:w-9 h-10 rounded-full transition duration-200 flex items-center justify-center"
             title="Notificaciones">
             <i class="fa-solid fa-bell"></i>
 

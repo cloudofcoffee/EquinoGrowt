@@ -13,7 +13,7 @@
         <div class="relative w-full">
           <i
             class="fa-solid fa-magnifying-glass text-gray-500 absolute left-4 top-1/2 transform -translate-y-1/2 text-base"></i>
-          <input v-model="busqueda" type="text" placeholder="Buscar contacto" class="w-full pl-10 pr-4 py-2 border rounded-full bg-gray-100 text-base
+          <input v-model="busqueda" type="text" placeholder="Agregar contacto" class="w-full pl-10 pr-4 py-2 border rounded-full bg-gray-100 text-base
              focus:outline-none focus:ring-2 focus:ring-[#146b60] focus:border-[#146b60]" />
         </div>
       </div>

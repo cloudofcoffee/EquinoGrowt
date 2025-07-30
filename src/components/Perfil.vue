@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white rounded-2xl shadow-xl w-full max-w-3xl mx-auto mt-10 p-8 relative">
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-3xl mx-auto p-8 relative">
     <!-- Loader -->
     <Loader v-if="cargando" class="absolute inset-0 z-10 bg-white/80 flex items-center justify-center rounded-2xl" />
 

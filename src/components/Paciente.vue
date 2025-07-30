@@ -235,7 +235,7 @@
                         class="bg-[#146b60] hover:bg-[#0d4c3f] text-white px-4 py-2 rounded-md shadow-sm transition">
                         <i class="fa-solid fa-download md:mr-2"></i><span class="hidden md:inline">Descargar PDF</span>
                     </button>
-                    <button @click="sendReport" :disabled="sendingReport"
+                    <button @click="generarYEnviarPDF" :disabled="sendingReport"
                         class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md shadow-sm transition disabled:opacity-50">
                         <i class="fa-solid fa-share-from-square md:mr-2"></i>
                         <span class="hidden md:inline">{{ sendingReport ? 'Enviando…' : 'Enviar por mail' }}</span>
@@ -267,7 +267,7 @@
                     <div><span class="font-semibold text-[#146b60]">Inicio de tratamiento:</span> {{
                         reportData.treatmentStart }}</div>
                     <div><span class="font-semibold text-[#146b60]">Centro de Equinoterapia:</span> {{ reportData.center
-                    }}</div>
+                        }}</div>
                     <div><span class="font-semibold text-[#146b60]">Diagnóstico:</span> {{ reportData.diagnosis }}</div>
                     <div><span class="font-semibold text-[#146b60]">Obra social:</span> {{ reportData.socialSecurity }}
                     </div>
@@ -298,12 +298,15 @@
 
 <script>
 import { doc, getDoc, collection, addDoc, query, orderBy, getDocs } from "firebase/firestore";
+import { storageSecondary } from "@/firebase";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { db } from "@/firebase";
 import { getAuth } from "firebase/auth";
 import Loader from "../components/Loader.vue";
 import html2canvas from 'html2canvas';
 import { jsPDF } from "jspdf";
-import axios from 'axios';
+import emailjs from 'emailjs-com'
+import Swal from "sweetalert2";
 
 export default {
     components: {
@@ -417,15 +420,36 @@ export default {
                 this.editandoNota = false;
             } catch (e) {
                 console.error("Error al guardar la nota:", e);
-                alert("No se pudo guardar la nota.");
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "No se pudo guardar la nota.",
+                    timerProgressBar: true,
+                    timer: 2500,
+                    showConfirmButton: false
+                });
             } finally {
                 this.guardandoNota = false; // ← loader parcial OFF
             }
         },
 
+        async subirPDFaStorage(pdfBlob, nombreArchivo) {
+            const archivoRef = ref(storageSecondary, `reportes/${nombreArchivo}`);
+            await uploadBytes(archivoRef, pdfBlob);
+            const url = await getDownloadURL(archivoRef);
+            return url;
+        },
+
         async exportPDF() {
             if (!this.reportStart || !this.reportEnd || !this.reportData.fullName || !this.reportData.dni) {
-                return alert('Completa todos los campos obligatorios.');
+                return Swal.fire({
+                    icon: "warning",
+                    title: "Revisa los campos",
+                    text: "Completa todos los campos obligatorios.",
+                    timerProgressBar: true,
+                    timer: 2500,
+                    showConfirmButton: false
+                });
             }
 
             const element = this.$refs.reportExport;
@@ -445,38 +469,91 @@ export default {
                 pdf.save(`informe_${this.reportData.fullName.replace(/ /g, '_')}_${this.reportStart}.pdf`);
             } catch (err) {
                 console.error(err);
-                alert('Error al generar el PDF.');
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "Error al generar el PDF.",
+                    timerProgressBar: true,
+                    timer: 2500,
+                    showConfirmButton: false
+                });
             } finally {
                 // Ocultamos nuevamente la sección
                 element.classList.add('hidden');
             }
         },
 
-        async sendReport() {
-            // Validar fechas y datos clave como arriba…
-            if (!this.reportStart || !this.reportEnd || !this.reportData.fullName) {
-                return alert('Completa fechas y nombre del paciente.');
-            }
-            this.sendingReport = true;
+        async generarYEnviarPDF() {
             try {
-                // Armamos un payload con todo junto
-                await axios.post('/api/reports', {
-                    startDate: this.reportStart,
-                    endDate: this.reportEnd,
-                    recipientEmail: this.paciente.email,
-                    recipientType: 'patient',
-                    reportDetails: this.reportData,   // <-- aquí van tus campos
+                this.sendingReport = true;
+
+                const pdf = new jsPDF();
+                const element = this.$refs.reportExport;
+
+                // Mostrar temporalmente el contenido oculto
+                element.classList.remove('hidden');
+
+                const canvas = await html2canvas(element, { scale: 2 });
+                const imgData = canvas.toDataURL("image/png");
+                const imgProps = pdf.getImageProperties(imgData);
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+
+                const pdfBlob = pdf.output("blob");
+                const nombreArchivo = `informe-${Date.now()}.pdf`;
+
+                const pdfUrl = await this.subirPDFaStorage(pdfBlob, nombreArchivo);
+
+                const templateParams = {
+                    to_name: this.paciente?.nombreCompleto || 'Paciente',
+                    to_email: this.paciente?.email?.trim(),
+                    message: "Tu informe está listo. Podés descargarlo aquí:",
+                    pdf_link: pdfUrl
+                };
+
+                if (!templateParams.to_email || templateParams.to_email.trim() === '') {
+                    console.error("Falta el email del paciente, no se puede enviar.");
+                    Swal.fire({
+                        icon: "error",
+                        title: "Email faltante",
+                        text: "El paciente no tiene un email cargado, por lo tanto no se puede enviar el informe.",
+                        timerProgressBar: true,
+                        timer: 3000,
+                        showConfirmButton: false
+                    });
+                    return;
+                }
+
+                await emailjs.send('service_i3s6y9j', 'template_lsyej2p', templateParams, 'MylOE1LcplgpOLz22');
+
+                await Swal.fire({
+                    icon: "success",
+                    title: "Informe enviado",
+                    text: "El informe fue enviado por correo correctamente.",
+                    timerProgressBar: true,
+                    timer: 2500,
+                    showConfirmButton: false
                 });
-                alert('Informe enviado por correo correctamente.');
-            } catch (err) {
-                console.error(err);
-                alert('Error al enviar el informe.');
+            } catch (error) {
+                console.error("Error al generar o enviar el informe:", error);
+                await Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "Hubo un problema al enviar el informe.",
+                    timerProgressBar: true,
+                    timer: 2500,
+                    showConfirmButton: false
+                });
             } finally {
+                // Volver a ocultar el contenido
+                this.$refs.reportExport.classList.add('hidden');
                 this.sendingReport = false;
             }
-        },
+        }
     },
     async mounted() {
+        emailjs.init("MylOE1LcplgpOLz22");
         const today = new Date();
         const lastWeek = new Date(today);
         lastWeek.setDate(today.getDate() - 7);
@@ -514,8 +591,21 @@ export default {
                 foto: pacienteData.photoURL || null,
             };
 
+            console.log("Paciente cargado:", this.paciente);
+
+            if (!this.paciente.email || this.paciente.email.trim() === '') {
+                Swal.fire({
+                    icon: "warning",
+                    title: "Email no disponible",
+                    text: "Este paciente no tiene un email registrado. No se podrá enviar el informe por correo.",
+                    timer: 3000,
+                    showConfirmButton: false,
+                });
+            }
+
             // Asignar datos completos al paciente para informe
             this.reportData = {
+                email: this.paciente.email,
                 fullName: this.paciente.nombreCompleto || '',
                 dni: this.paciente.dni || '',
                 nationality: this.paciente.nacionalidad || '',
