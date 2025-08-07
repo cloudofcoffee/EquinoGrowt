@@ -10,7 +10,7 @@
             <div class="flex items-center justify-between w-full mb-4">
                 <div>
                     <h1 class="text-xl font-semibold text-[#146b60]">
-                        Hola {{ tipoUsuario === 'doctor' ? 'D.r ' + nombreUsuario : nombreUsuario }}
+                        Hola {{ tipoUsuario === 'doctor' ? 'Dr. ' + nombreUsuario : nombreUsuario }}
                     </h1>
                     <p class="text-gray-500 capitalize text-sm">{{ mesActual }} {{ añoActual }}</p>
                 </div>
@@ -323,36 +323,47 @@ export default {
                 return;
             }
 
-            this.cargando = true;
-
             try {
                 const user = auth.currentUser;
                 const pacienteUid = user.uid;
 
-                // Obtener nombre del paciente desde Tipo_de_usuario
                 const refPaciente = doc(db, "Tipo_de_usuario", pacienteUid);
                 const snap = await getDoc(refPaciente);
                 const data = snap.data();
-
                 const nombrePaciente = data.nombre || "Paciente";
 
-                // Obtener doctor asignado desde doctores
                 const snapshot = await getDocs(collection(db, "doctores"));
                 let doctorUid = null;
 
-                snapshot.forEach(doc => {
-                    const pacientesMap = doc.data().pacientes || {};
+                snapshot.forEach(docSnap => {
+                    const pacientesMap = docSnap.data().pacientes || {};
                     if (pacientesMap[pacienteUid]) {
-                        doctorUid = doc.id;
+                        doctorUid = docSnap.id;
                     }
                 });
 
                 if (!doctorUid) {
-                    await swal.fire('Sin doctor asignado', 'No tenés un doctor asignado actualmente.', 'info');
-                    return;
+                    const { isConfirmed } = await swal.fire({
+                        icon: 'info',
+                        title: 'Sin doctor asignado',
+                        text: 'No tenés un doctor asignado actualmente.',
+                        showCancelButton: true,
+                        confirmButtonText: 'Ponte en contacto',
+                        cancelButtonText: 'Ok',
+                        customClass: {
+                            confirmButton: 'bg-[#146b60] text-white px-4 py-2 rounded-lg mr-3',
+                            cancelButton: 'text-gray-50 bg-red-600 px-4 py-2 rounded-lg'
+                        }
+                    });
+
+                    if (isConfirmed) {
+                        this.$router.push('/chat');
+                    }
+                    return; 
                 }
 
-                // Enviar notificación
+                this.cargando = true;
+
                 await addDoc(collection(db, 'notificaciones'), {
                     usuarioId: doctorUid,
                     titulo: 'Solicitud de turno',
@@ -371,7 +382,6 @@ export default {
                     showConfirmButton: false
                 });
 
-                // Limpiar campos
                 this.fechaSeleccionada = null;
                 this.horaInicio = "";
                 this.horaFin = "";
