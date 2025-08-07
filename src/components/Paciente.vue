@@ -65,7 +65,7 @@
                 <!-- Otros datos -->
                 <div class="bg-gray-100 p-4 rounded-xl">
                     <h4 class="font-semibold text-lg mb-3">Otros</h4>
-                    <p><strong>Telefono:</strong> {{ paciente.telefono || 'No cargado' }}</p>
+                    <p><strong>Teléfono:</strong> {{ paciente.telefono || 'No cargado' }}</p>
                     <p><strong>Dirección:</strong> {{ paciente.direccion || 'No cargada' }}</p>
                     <p><strong>Cuenta:</strong> {{ paciente.acompanante || 'No especificado' }}</p>
                     <p><strong>Obra Social:</strong> {{ paciente.obraSocial || 'No especificada' }}</p>
@@ -229,16 +229,10 @@
                     </div>
                 </div>
 
-                <!-- Botones -->
                 <div class="flex flex-wrap gap-3 mt-6">
                     <button @click="exportPDF"
                         class="bg-[#146b60] hover:bg-[#0d4c3f] text-white px-4 py-2 rounded-md shadow-sm transition">
-                        <i class="fa-solid fa-download md:mr-2"></i><span class="hidden md:inline">Descargar PDF</span>
-                    </button>
-                    <button @click="generarYEnviarPDF" :disabled="sendingReport"
-                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md shadow-sm transition disabled:opacity-50">
-                        <i class="fa-solid fa-share-from-square md:mr-2"></i>
-                        <span class="hidden md:inline">{{ sendingReport ? 'Enviando…' : 'Enviar por mail' }}</span>
+                        <i class="fa-solid fa-download mr-2"></i>Descargar PDF
                     </button>
                 </div>
             </div>
@@ -246,7 +240,7 @@
             <!-- VISTA OCULTA SOLO PARA EXPORTAR PDF -->
             <div ref="reportExport"
                 class="hidden text-black bg-white p-10 rounded-xl border border-gray-300 shadow-md font-sans"
-                style="width: 794px; min-height: 1123px; margin: 0 auto; box-sizing: border-box;">
+                style="width: 794px; margin: 0 auto; box-sizing: border-box;">
 
                 <!-- Logo y encabezado -->
                 <div class="flex items-center justify-between mb-8 border-b-2 border-[#cdeee2] pb-4">
@@ -299,12 +293,12 @@
 <script>
 import { doc, getDoc, collection, addDoc, query, orderBy, getDocs } from "firebase/firestore";
 import { storageSecondary } from "@/firebase";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { db } from "@/firebase";
 import { getAuth } from "firebase/auth";
 import Loader from "../components/Loader.vue";
 import html2canvas from 'html2canvas';
-import { jsPDF } from "jspdf";
+import jsPDF from "jspdf";
 import emailjs from 'emailjs-com'
 import Swal from "sweetalert2";
 
@@ -482,78 +476,8 @@ export default {
                 element.classList.add('hidden');
             }
         },
-
-        async generarYEnviarPDF() {
-            try {
-                this.sendingReport = true;
-
-                const pdf = new jsPDF();
-                const element = this.$refs.reportExport;
-
-                // Mostrar temporalmente el contenido oculto
-                element.classList.remove('hidden');
-
-                const canvas = await html2canvas(element, { scale: 2 });
-                const imgData = canvas.toDataURL("image/png");
-                const imgProps = pdf.getImageProperties(imgData);
-                const pdfWidth = pdf.internal.pageSize.getWidth();
-                const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-                pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-
-                const pdfBlob = pdf.output("blob");
-                const nombreArchivo = `informe-${Date.now()}.pdf`;
-
-                const pdfUrl = await this.subirPDFaStorage(pdfBlob, nombreArchivo);
-
-                const templateParams = {
-                    to_name: this.paciente?.nombreCompleto || 'Paciente',
-                    to_email: this.paciente?.email?.trim(),
-                    message: "Tu informe está listo. Podés descargarlo aquí:",
-                    pdf_link: pdfUrl
-                };
-
-                if (!templateParams.to_email || templateParams.to_email.trim() === '') {
-                    console.error("Falta el email del paciente, no se puede enviar.");
-                    Swal.fire({
-                        icon: "error",
-                        title: "Email faltante",
-                        text: "El paciente no tiene un email cargado, por lo tanto no se puede enviar el informe.",
-                        timerProgressBar: true,
-                        timer: 3000,
-                        showConfirmButton: false
-                    });
-                    return;
-                }
-
-                await emailjs.send('service_i3s6y9j', 'template_lsyej2p', templateParams, 'MylOE1LcplgpOLz22');
-
-                await Swal.fire({
-                    icon: "success",
-                    title: "Informe enviado",
-                    text: "El informe fue enviado por correo correctamente.",
-                    timerProgressBar: true,
-                    timer: 2500,
-                    showConfirmButton: false
-                });
-            } catch (error) {
-                console.error("Error al generar o enviar el informe:", error);
-                await Swal.fire({
-                    icon: "error",
-                    title: "Error",
-                    text: "Hubo un problema al enviar el informe.",
-                    timerProgressBar: true,
-                    timer: 2500,
-                    showConfirmButton: false
-                });
-            } finally {
-                // Volver a ocultar el contenido
-                this.$refs.reportExport.classList.add('hidden');
-                this.sendingReport = false;
-            }
-        }
     },
     async mounted() {
-        emailjs.init("MylOE1LcplgpOLz22");
         const today = new Date();
         const lastWeek = new Date(today);
         lastWeek.setDate(today.getDate() - 7);

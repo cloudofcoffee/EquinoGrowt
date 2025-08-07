@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white rounded-2xl shadow-xl w-full max-w-3xl mx-auto p-8 relative">
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-3xl mx-auto mt-10 p-8 relative">
     <!-- Loader -->
     <Loader v-if="cargando" class="absolute inset-0 z-10 bg-white/80 flex items-center justify-center rounded-2xl" />
 
@@ -103,8 +103,8 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div v-for="(value, key) in camposFiltrados" :key="key"
           class="border border-[#cdeee2] rounded-xl p-4 bg-white shadow-sm">
-          <label class="block text-sm text-gray-600 font-semibold capitalize mb-1">
-            {{ key.replace(/([A-Z])/g, ' $1') }}
+          <label class="block text-sm text-gray-600 font-semibold mb-1">
+            {{ traducirCampo(key) }}
           </label>
 
           <transition name="fade-slide" mode="out-in">
@@ -182,6 +182,7 @@ export default {
       camposEditables: {},
       infoExtra: {
         nombreCompleto: "",
+        edad: "",
         dni: "",
         telefono: "",
         direccion: "",
@@ -211,6 +212,7 @@ export default {
         this.nuevoNombre = data.nombre;
         this.infoExtra = {
           nombreCompleto: data.nombreCompleto || "",
+          edad: data.edad || "",
           dni: data.dni || "",
           telefono: data.telefono || "",
           direccion: data.direccion || "",
@@ -230,6 +232,23 @@ export default {
     }
   },
   methods: {
+    traducirCampo(key) {
+      const traducciones = {
+        nombreCompleto: "Nombre completo",
+        edad: "Edad",
+        dni: "DNI",
+        telefono: "Teléfono",
+        direccion: "Dirección",
+        obraSocial: "Obra social",
+        fechaNacimiento: "Fecha de nacimiento",
+        medicoCabecera: "Médico de cabecera",
+        nacionalidad: "Nacionalidad",
+        centro: "Centro"
+      };
+
+      return traducciones[key] || key;
+    },
+
     seleccionarFoto() {
       this.$refs.inputFoto.click();
     },

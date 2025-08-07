@@ -81,7 +81,7 @@
             <span class="text-2xl font-bold">&copy; EquinoGrowt</span>
           </div>
           <p class="text-sm">
-            EquinoGrowt ofrece equino terapia para mejorar el bienestar físico y emocional a través del vínculo con los
+            EquinoGrowt ofrece equinoterapia para mejorar el bienestar físico y emocional a través del vínculo con los
             caballos.
           </p>
         </div>

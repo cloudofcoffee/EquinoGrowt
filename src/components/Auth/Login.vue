@@ -53,12 +53,21 @@
                         Contraseña
                     </label>
 
+                    <div class="text-left">
+                        <button type="button" @click="resetPassword"
+                            class="text-sm text-[#146b60] hover:underline font-semibold">
+                            ¿Olvidaste tu contraseña?
+                        </button>
+                    </div>
+
                     <!-- Botón con ícono FontAwesome -->
-                    <button type="button" @click="toggleMostrarPassword"
-                        class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-[#146b60] transition"
-                        aria-label="Mostrar u ocultar contraseña">
-                        <i :class="mostrarPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
-                    </button>
+                    <div class="absolute inset-y-0 right-0 -top-5 pr-3 flex items-center">
+                        <button type="button" @click="toggleMostrarPassword"
+                            class="text-gray-500 hover:text-[#146b60] transition"
+                            aria-label="Mostrar u ocultar contraseña">
+                            <i :class="mostrarPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Botón de enviar -->
@@ -76,7 +85,7 @@
 import Loader from "@/components/Loader.vue";
 import ErrorMessage from "@/components/ErrorMessage.vue";
 import Swal from "sweetalert2";
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
 
 export default {
     components: {
@@ -147,6 +156,52 @@ export default {
         toggleMostrarPassword() {
             this.mostrarPassword = !this.mostrarPassword;
         },
+        async resetPassword() {
+            const auth = getAuth();
+            if (!this.email) {
+                Swal.fire({
+                    title: "Campo vacío",
+                    text: "Por favor ingresá tu correo electrónico para recuperar tu contraseña.",
+                    icon: "warning",
+                    timerProgressBar: true,
+                    showConfirmButton: false,
+                    timer: 3000,
+                });
+                return;
+            }
+
+            try {
+                await sendPasswordResetEmail(auth, this.email);
+                Swal.fire({
+                    title: "Correo enviado",
+                    text: "Revisá tu bandeja de entrada para restablecer tu contraseña. ¡Revisar SPAM!",
+                    icon: "success",
+                    timerProgressBar: true,
+                    showConfirmButton: false,
+                    timer: 3000,
+                });
+            } catch (error) {
+                const match = error.message.match(/\(auth\/[^\)]+\)/);
+                const code = match ? match[0].replace(/[()]/g, '') : null;
+
+                const errorMap = {
+                    'auth/user-not-found': 'No existe una cuenta con este correo.',
+                    'auth/invalid-email': 'El correo no es válido.',
+                    'auth/missing-email': 'Por favor ingresá un correo electrónico.',
+                };
+
+                this.errorMessage = errorMap[code] || 'Ocurrió un error al intentar enviar el correo.';
+
+                Swal.fire({
+                    title: "Error",
+                    text: this.errorMessage,
+                    icon: "error",
+                    timerProgressBar: true,
+                    showConfirmButton: false,
+                    timer: 8000,
+                });
+            }
+        }
     },
 };
 </script>
