@@ -67,6 +67,52 @@
       console.log("PWA instalada");
       document.getElementById("pwa-popup").classList.add("opacity-0", "invisible");
     });
+
+    async function limpiarCacheTotal() {
+      try {
+        // 1️⃣ Borrar todas las caches del Service Worker
+        if ('caches' in window) {
+          const cacheNames = await caches.keys();
+          await Promise.all(cacheNames.map(name => caches.delete(name)));
+          console.log("Cache de Service Worker eliminada");
+        }
+
+        // 2️⃣ Borrar localStorage y sessionStorage
+        localStorage.clear();
+        sessionStorage.clear();
+        console.log("Almacenamiento local limpiado");
+
+        // 3️⃣ Desinstalar Service Worker viejo
+        if ('serviceWorker' in navigator) {
+          const registrations = await navigator.serviceWorker.getRegistrations();
+          for (let reg of registrations) {
+            await reg.unregister();
+            console.log("Service Worker desinstalado");
+          }
+        }
+
+        // 4️⃣ Recargar página para traer archivos nuevos
+        location.reload();
+      } catch (error) {
+        console.error("Error al limpiar cache:", error);
+      }
+    }
+
+    // Función para verificar si han pasado 30 días
+    function verificarLimpiezaMensual() {
+      const ultimaLimpieza = localStorage.getItem("ultimaLimpiezaCache");
+      const ahora = Date.now();
+
+      if (!ultimaLimpieza || (ahora - parseInt(ultimaLimpieza)) > (30 * 24 * 60 * 60 * 1000)) {
+        // Si nunca se limpió o pasaron más de 30 días → limpiar cache
+        limpiarCacheTotal();
+        localStorage.setItem("ultimaLimpiezaCache", ahora.toString());
+      }
+    }
+
+    // Ejecutar verificación al cargar la página
+    document.addEventListener("DOMContentLoaded", verificarLimpiezaMensual);
+
   </script>
 </body>
 
