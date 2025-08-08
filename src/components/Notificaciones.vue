@@ -23,7 +23,8 @@
                 <li v-for="noti in notificaciones" :key="noti.id" class="p-4 hover:bg-gray-50 border-b relative">
                     <!-- Botón de eliminar solo para notificaciones normales -->
                     <div class="absolute top-3 right-3" v-if="noti.tipo !== 'solicitud_turno'">
-                        <Loader v-if="notificacionEnProceso === noti.id" class="w-4 h-4" />
+                        <Loader v-if="notificacionEnProceso === noti.id"
+                            class="absolute inset-0 z-10 bg-white/80 flex items-center justify-center rounded-2xl" />
                         <button v-else @click="eliminarNotificacion(noti.id)"
                             class="text-white transition bg-red-500 rounded-full p-1 hover:bg-white hover:text-red-700 text-sm w-6 h-6">
                             <i class="fa-solid fa-xmark"></i>
@@ -40,7 +41,7 @@
                             class="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600">
                             Aceptar
                         </button>
-                        <button @click="eliminarNotificacion(noti.id)"
+                        <button @click="rechazarTurno(noti)"
                             class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">
                             Rechazar
                         </button>
@@ -265,6 +266,72 @@ export default {
             } catch (error) {
                 console.error("Error en aceptarTurno:", error);
                 await Swal.fire('Error', 'Ocurrió un error al aceptar el turno.', 'error');
+            } finally {
+                this.cargando = false;
+            }
+        },
+
+        async rechazarTurno(noti) {
+            try {
+                const confirm = await Swal.fire({
+                    title: '¿Rechazar turno?',
+                    text: 'Esta acción no se puede deshacer.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí, rechazar',
+                    cancelButtonText: 'Cancelar',
+                    customClass: {
+                        confirmButton: 'bg-[#146b60] text-white px-4 py-2 rounded-lg mr-3',
+                        cancelButton: 'bg-red-600 text-white px-4 py-2 rounded-lg'
+                    }
+                });
+
+                if (!confirm.isConfirmed) return;
+
+                this.cargando = true;
+
+                // UID del paciente
+                const pacienteUid = noti.pacienteUid || noti.usuarioId;
+                if (!pacienteUid) {
+                    await Swal.fire('Error', 'No se encontró el paciente para esta notificación.', 'error');
+                    return;
+                }
+
+                // Eliminar notificación original
+                if (noti.id) {
+                    await deleteDoc(doc(this.db, "notificaciones", noti.id));
+                    this.notificaciones = this.notificaciones.filter(n => n.id !== noti.id);
+                }
+
+                // Enviar notificación al paciente
+                await addDoc(collection(this.db, 'notificaciones'), {
+                    usuarioId: pacienteUid,
+                    titulo: 'Turno rechazado',
+                    mensaje: 'Tu solicitud de turno ha sido rechazada por el doctor.',
+                    tipo: 'turno-rechazado',
+                    leida: false,
+                    fecha: serverTimestamp()
+                });
+
+                await Swal.fire({
+                    icon: 'success',
+                    title: 'Turno rechazado',
+                    text: 'Se informó al paciente del rechazo.',
+                    timerProgressBar: true,
+                    timer: 2500,
+                    showConfirmButton: false
+                });
+
+            } catch (error) {
+                console.error("Error al rechazar turno:", error);
+                await Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Ocurrió un error al rechazar el turno.',
+                    timerProgressBar: true,
+                    timer: 2500,
+                    showConfirmButton: false
+                });
             } finally {
                 this.cargando = false;
             }
