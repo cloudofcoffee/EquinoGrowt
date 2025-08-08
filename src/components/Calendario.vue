@@ -311,27 +311,34 @@ export default {
         },
 
         async enviarSolicitudTurno() {
+            // Evita que se pueda enviar más de una vez
+            if (this.cargando) return;
+
+            // Validaciones de campos
             if (!this.fechaSeleccionada || !this.horaInicio || !this.horaFin) {
                 await swal.fire({
                     icon: 'warning',
                     title: 'Campos incompletos',
                     text: 'Debes seleccionar una fecha y un horario sugerido.',
                     timerProgressBar: true,
-                    timer: 10000,
+                    timer: 5000,
                     showConfirmButton: false
                 });
                 return;
             }
 
+            this.cargando = true;
             try {
                 const user = auth.currentUser;
                 const pacienteUid = user.uid;
 
+                // Obtener nombre del paciente
                 const refPaciente = doc(db, "Tipo_de_usuario", pacienteUid);
                 const snap = await getDoc(refPaciente);
                 const data = snap.data();
-                const nombrePaciente = data.nombre || "Paciente";
+                const nombrePaciente = data?.nombre || "Paciente";
 
+                // Buscar el doctor asignado
                 const snapshot = await getDocs(collection(db, "doctores"));
                 let doctorUid = null;
 
@@ -342,6 +349,7 @@ export default {
                     }
                 });
 
+                // Si no hay doctor asignado
                 if (!doctorUid) {
                     const { isConfirmed } = await swal.fire({
                         icon: 'info',
@@ -359,13 +367,13 @@ export default {
                     if (isConfirmed) {
                         this.$router.push('/chat');
                     }
-                    return; 
+                    return;
                 }
 
-                this.cargando = true;
-
+                // Enviar notificación al doctor
                 await addDoc(collection(db, 'notificaciones'), {
                     usuarioId: doctorUid,
+                    pacienteUid: pacienteUid,
                     titulo: 'Solicitud de turno',
                     mensaje: `${nombrePaciente} solicita un turno para el ${this.fechaSeleccionada} de ${this.horaInicio} a ${this.horaFin}.`,
                     tipo: 'solicitud-turno',
@@ -382,6 +390,7 @@ export default {
                     showConfirmButton: false
                 });
 
+                // Reiniciar campos
                 this.fechaSeleccionada = null;
                 this.horaInicio = "";
                 this.horaFin = "";
